@@ -10,6 +10,9 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+    plugins {
+        id("androidx.baselineprofile") version "1.3.3" apply false
+    }
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -20,4 +23,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "example-android"
+
 include(":app")
+include(":baselineprofile")
