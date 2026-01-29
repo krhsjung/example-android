@@ -2,26 +2,55 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
+        android:name=".ExampleApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="@string/application_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Exampleandroid">
+        android:theme="@style/Theme.ExampleAndroid"
+        android:enableOnBackInvokedCallback="true">
+
+        <!-- Splash Activity (Entry Point) -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.feature.splash.SplashActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Exampleandroid">
+            android:theme="@style/Theme.ExampleAndroid">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Auth Activity -->
+        <activity
+            android:name=".ui.feature.auth.AuthActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.ExampleAndroid">
+            <!-- OAuth 딥링크 콜백 처리 -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="example"
+                    android:host="oauth"
+                    android:path="/callback" />
+            </intent-filter>
+        </activity>
+
+        <!-- Main Activity -->
+        <activity
+            android:name=".ui.feature.main.MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ExampleAndroid" />
+
     </application>
 
 </manifest>
