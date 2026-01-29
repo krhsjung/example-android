@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="server_auth_credentials_invalid">Invalid email or password</string>
+    <string name="server_auth_provider_unsupported">Unsupported auth provider</string>
+    <string name="server_auth_session_not_found">Session not found</string>
+    <string name="server_auth_session_invalid">Invalid session</string>
+    <string name="server_auth_code_invalid">Invalid or expired auth code</string>
+    <string name="server_user_not_found">User not found</string>
+    <string name="server_user_already_exists">User already exists</string>
+</resources>

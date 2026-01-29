@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- General errors -->
+    <string name="errorCancelled">Cancelled</string>
+    <string name="error_decoding">Decoding error</string>
+    <string name="error_encoding">Encoding error</string>
+    <string name="error_invalid_url">Invalid url</string>
+    <string name="error_login_cancelled">Login was cancelled</string>
+    <string name="error_login_failed">Login failed</string>
+    <string name="error_no_data">No data</string>
+    <string name="error_oauth_callback_failed">Failed to receive callback URL</string>
+    <string name="error_signup_failed">Signup failed</string>
+    <string name="error_unknown">Unknown error</string>
+
+    <!-- Network errors -->
+    <string name="error_timeout">Connection timed out. Please try again.</string>
+    <string name="error_no_connection">No internet connection. Please check your network.</string>
+    <string name="error_server">Server error occurred. Please try again later.</string>
+    <string name="error_bad_request">Invalid request</string>
+    <string name="error_not_found">Not found</string>
+    <string name="error_rate_limited">Too many requests. Please try again later.</string>
+    <string name="error_rate_limited_with_retry">Too many requests. Please try again in %1$d seconds.</string>
+
+    <!-- Auth errors -->
+    <string name="error_unauthorized">Authentication required</string>
+    <string name="error_forbidden">Access denied</string>
+    <string name="error_session_expired">Session expired. Please log in again.</string>
+
+    <!-- Validation errors -->
+    <string name="error_empty_email">Please enter your email</string>
+    <string name="error_invalid_email">Please enter a valid email address</string>
+    <string name="error_empty_password">Please enter your password</string>
+    <string name="error_empty_confirm_password">Please confirm your password</string>
+    <string name="error_weak_password">Password must be at least 8 characters</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="error_empty_username">Please enter your name</string>
+    <string name="error_name_min_length">Name must be at least 2 characters</string>
+    <string name="error_password_no_uppercase">Password must contain an uppercase letter</string>
+    <string name="error_password_no_lowercase">Password must contain a lowercase letter</string>
+    <string name="error_password_no_number">Password must contain a number</string>
+    <string name="error_password_not_match">Passwords do not match</string>
+    <string name="error_password_no_special_character">Password must contain a special character</string>
+</resources>
