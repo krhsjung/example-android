@@ -11,11 +11,11 @@ object TestFixtures {
      * 테스트용 User 객체 생성
      */
     fun createUser(
-        id: String = "test-user-id",
+        idx: Int = 1,
         name: String = "Test User",
         email: String = "test@test.com"
     ) = User(
-        id = id,
+        idx = idx,
         name = name,
         email = email
     )

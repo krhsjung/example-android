@@ -72,8 +72,8 @@ data class ExchangeRequestDto(
  */
 @Serializable
 data class UserDto(
-    @SerialName("id")
-    val id: String,
+    @SerialName("idx")
+    val idx: Int,
     @SerialName("name")
     val name: String,
     @SerialName("email")
@@ -86,7 +86,7 @@ data class UserDto(
     val maxSessions: Int? = null
 ) {
     fun toDomain(): User = User(
-        id = id,
+        idx = idx,
         name = name,
         email = email,
         picture = picture,

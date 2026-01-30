@@ -4,12 +4,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import com.google.common.truth.Truth.assertThat
-import kr.hs.jung.example.ui.component.common.ExampleInputBox
+import kr.hs.jung.example.ui.component.input.ExampleInputBox
 import kr.hs.jung.example.util.BaseComposeTest
 import org.junit.Test
 

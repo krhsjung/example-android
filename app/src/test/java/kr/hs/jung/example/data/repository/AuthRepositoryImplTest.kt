@@ -72,7 +72,7 @@ class AuthRepositoryImplTest {
     @Test
     fun `login returns mapped domain model on success`() = runTest {
         // Given
-        val userDto = UserDto(id = "1", name = "Test User", email = "test@test.com")
+        val userDto = UserDto(idx = 1, name = "Test User", email = "test@test.com")
         coEvery { authApi.login(any()) } returns Response.success(userDto)
 
         // When
@@ -81,7 +81,7 @@ class AuthRepositoryImplTest {
         // Then
         assertThat(result.isSuccess).isTrue()
         val user = result.getOrNull()
-        assertThat(user?.id).isEqualTo("1")
+        assertThat(user?.idx).isEqualTo(1)
         assertThat(user?.name).isEqualTo("Test User")
         assertThat(user?.email).isEqualTo("test@test.com")
     }
@@ -89,7 +89,7 @@ class AuthRepositoryImplTest {
     @Test
     fun `login caches user on success`() = runTest {
         // Given
-        val userDto = UserDto(id = "1", name = "Test User", email = "test@test.com")
+        val userDto = UserDto(idx = 1, name = "Test User", email = "test@test.com")
         coEvery { authApi.login(any()) } returns Response.success(userDto)
 
         // When
@@ -102,7 +102,7 @@ class AuthRepositoryImplTest {
     @Test
     fun `login calls api with correct request`() = runTest {
         // Given
-        val userDto = UserDto(id = "1", name = "Test", email = "test@test.com")
+        val userDto = UserDto(idx = 1, name = "Test", email = "test@test.com")
         coEvery { authApi.login(any()) } returns Response.success(userDto)
 
         val request = LoginRequestDto("test@test.com", "password123")
@@ -152,7 +152,7 @@ class AuthRepositoryImplTest {
     @Test
     fun `signUp returns mapped domain model on success`() = runTest {
         // Given
-        val userDto = UserDto(id = "2", name = "New User", email = "new@test.com")
+        val userDto = UserDto(idx = 2, name = "New User", email = "new@test.com")
         coEvery { authApi.signUp(any()) } returns Response.success(userDto)
 
         // When
@@ -167,7 +167,7 @@ class AuthRepositoryImplTest {
     @Test
     fun `signUp caches user on success`() = runTest {
         // Given
-        val userDto = UserDto(id = "2", name = "New User", email = "new@test.com")
+        val userDto = UserDto(idx = 2, name = "New User", email = "new@test.com")
         coEvery { authApi.signUp(any()) } returns Response.success(userDto)
 
         // When
@@ -239,7 +239,7 @@ class AuthRepositoryImplTest {
     @Test
     fun `me returns user on success`() = runTest {
         // Given
-        val userDto = UserDto(id = "1", name = "Current User", email = "current@test.com")
+        val userDto = UserDto(idx = 1, name = "Current User", email = "current@test.com")
         coEvery { authApi.me() } returns Response.success(userDto)
 
         // When
@@ -253,7 +253,7 @@ class AuthRepositoryImplTest {
     @Test
     fun `me caches user on success`() = runTest {
         // Given
-        val userDto = UserDto(id = "1", name = "Current User", email = "current@test.com")
+        val userDto = UserDto(idx = 1, name = "Current User", email = "current@test.com")
         coEvery { authApi.me() } returns Response.success(userDto)
 
         // When
@@ -299,7 +299,7 @@ class AuthRepositoryImplTest {
     @Test
     fun `getCachedUser returns cached user`() = runTest {
         // Given
-        val cachedUser = User(id = "1", name = "Cached", email = "cached@test.com")
+        val cachedUser = User(idx = 1, name = "Cached", email = "cached@test.com")
         coEvery { userCache.get() } returns cachedUser
 
         // When
@@ -324,7 +324,7 @@ class AuthRepositoryImplTest {
     @Test
     fun `getUser returns cached user when available and forceRefresh is false`() = runTest {
         // Given
-        val cachedUser = User(id = "1", name = "Cached", email = "cached@test.com")
+        val cachedUser = User(idx = 1, name = "Cached", email = "cached@test.com")
         coEvery { userCache.get() } returns cachedUser
 
         // When
@@ -340,7 +340,7 @@ class AuthRepositoryImplTest {
     fun `getUser fetches from server when cache is empty`() = runTest {
         // Given
         coEvery { userCache.get() } returns null
-        val userDto = UserDto(id = "1", name = "Server User", email = "server@test.com")
+        val userDto = UserDto(idx = 1, name = "Server User", email = "server@test.com")
         coEvery { authApi.me() } returns Response.success(userDto)
 
         // When
@@ -355,9 +355,9 @@ class AuthRepositoryImplTest {
     @Test
     fun `getUser fetches from server when forceRefresh is true`() = runTest {
         // Given
-        val cachedUser = User(id = "1", name = "Cached", email = "cached@test.com")
+        val cachedUser = User(idx = 1, name = "Cached", email = "cached@test.com")
         coEvery { userCache.get() } returns cachedUser
-        val userDto = UserDto(id = "1", name = "Fresh User", email = "fresh@test.com")
+        val userDto = UserDto(idx = 1, name = "Fresh User", email = "fresh@test.com")
         coEvery { authApi.me() } returns Response.success(userDto)
 
         // When

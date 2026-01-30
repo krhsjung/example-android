@@ -7,9 +7,9 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.test.runTest
 import kr.hs.jung.example.data.remote.dto.LoginRequestDto
-import kr.hs.jung.example.domain.manager.AuthManager
 import kr.hs.jung.example.domain.repository.AuthRepository
 import kr.hs.jung.example.domain.service.PasswordHasher
+import kr.hs.jung.example.ui.common.state.AuthManager
 import kr.hs.jung.example.util.TestFixtures
 import org.junit.Before
 import org.junit.Test

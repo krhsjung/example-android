@@ -30,7 +30,7 @@ interface AuthApi {
     suspend fun logout(): Response<Unit>
 
     /** 이메일 회원가입 */
-    @POST("user")
+    @POST("auth/register")
     suspend fun signUp(@Body request: SignUpRequestDto): Response<UserDto>
 
     /** 현재 로그인된 사용자 정보 조회 */

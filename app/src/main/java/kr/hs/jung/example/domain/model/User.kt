@@ -5,7 +5,7 @@ package kr.hs.jung.example.domain.model
  *
  * 인증된 사용자의 정보를 담는 도메인 모델입니다.
  *
- * @property id 사용자 고유 식별자
+ * @property idx 사용자 고유 식별자
  * @property name 사용자 이름
  * @property email 이메일 주소
  * @property picture 프로필 이미지 URL (선택)
@@ -13,7 +13,7 @@ package kr.hs.jung.example.domain.model
  * @property maxSessions 최대 허용 세션 수
  */
 data class User(
-    val id: String,
+    val idx: Int,
     val name: String,
     val email: String,
     val picture: String? = null,

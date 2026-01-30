@@ -7,8 +7,8 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
-import kr.hs.jung.example.ui.component.common.ExampleButton
-import kr.hs.jung.example.ui.component.common.ExampleOutlinedButton
+import kr.hs.jung.example.ui.component.button.ExampleButton
+import kr.hs.jung.example.ui.component.button.ExampleOutlinedButton
 import kr.hs.jung.example.ui.theme.ButtonStyle
 import kr.hs.jung.example.util.BaseComposeTest
 import org.junit.Test

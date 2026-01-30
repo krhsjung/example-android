@@ -18,7 +18,7 @@ import kotlin.time.Duration.Companion.minutes
  */
 @Serializable
 data class CachedUser(
-    val id: String,
+    val idx: Int,
     val name: String,
     val email: String,
     val picture: String? = null,
@@ -26,7 +26,7 @@ data class CachedUser(
     val maxSessions: Int? = null
 ) {
     fun toDomain(): User = User(
-        id = id,
+        idx = idx,
         name = name,
         email = email,
         picture = picture,
@@ -36,7 +36,7 @@ data class CachedUser(
 
     companion object {
         fun fromDomain(user: User): CachedUser = CachedUser(
-            id = user.id,
+            idx = user.idx,
             name = user.name,
             email = user.email,
             picture = user.picture,
@@ -111,7 +111,7 @@ class UserCache @Inject constructor(
      * @param user 저장할 사용자 정보
      */
     suspend fun set(user: User) {
-        AppLogger.d(TAG, "Caching user: ${user.id}")
+        AppLogger.d(TAG, "Caching user: ${user.idx}")
         // 메모리 캐시 저장
         memoryCache.set(user)
         // 디스크 캐시 저장
