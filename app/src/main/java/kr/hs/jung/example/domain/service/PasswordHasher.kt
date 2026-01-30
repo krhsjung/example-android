@@ -7,9 +7,12 @@ import javax.inject.Singleton
 /**
  * 비밀번호 해싱 서비스
  *
- * Domain 레이어에서 비밀번호 해싱 로직을 담당
- * 클라이언트 사이드 해싱은 보안상 권장되지 않으나,
- * 서버와의 호환성을 위해 유지
+ * 클라이언트에서 SHA-512로 해싱하여 전송하고,
+ * 서버에서 수신한 해시값을 Argon2로 다시 해싱하여 저장합니다.
+ * 이를 통해 평문 비밀번호가 네트워크에 노출되지 않으며 (TLS 실패/로그 유출 대비),
+ * 서버 DB 유출 시에도 Argon2로 보호됩니다.
+ *
+ * @see <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">OWASP Password Storage</a>
  */
 @Singleton
 class PasswordHasher @Inject constructor() {

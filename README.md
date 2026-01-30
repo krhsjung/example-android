@@ -183,6 +183,7 @@ app/src/main/java/kr/hs/jung/example/
 - **쿠키 암호화**: `EncryptedSharedPreferences` (AES-256-GCM) 기반 쿠키 저장
 - **SSL Pinning**: `CertificatePinner` 구조 구현 (해시 추가 시 활성화)
 - **로그 마스킹**: 네트워크 로그에서 password, token 등 민감 필드 자동 마스킹
+- **비밀번호 해싱**: 클라이언트 SHA-512 → 서버 Argon2 이중 해싱 (평문 전송 방지)
 - **Release 보안**: R8 난독화, 리소스 축소, 로깅 비활성화
 
 ---
@@ -192,7 +193,6 @@ app/src/main/java/kr/hs/jung/example/
 ### 보안
 
 - [ ] SSL Pinning 프로덕션 해시 추가 (`SSLPinningConfig.pinnedKeyHashes`)
-- [ ] 비밀번호 보안 개선 (클라이언트 SHA-512 → 서버 측 bcrypt/Argon2)
 
 ### 기능
 
