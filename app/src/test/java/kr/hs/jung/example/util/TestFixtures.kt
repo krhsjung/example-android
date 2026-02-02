@@ -1,5 +1,7 @@
 package kr.hs.jung.example.util
 
+import kr.hs.jung.example.data.remote.dto.AuthResponseDto
+import kr.hs.jung.example.data.remote.dto.UserDto
 import kr.hs.jung.example.domain.model.User
 
 /**
@@ -18,6 +20,19 @@ object TestFixtures {
         idx = idx,
         name = name,
         email = email
+    )
+
+    /**
+     * 테스트용 AuthResponseDto 생성
+     */
+    fun createAuthResponse(
+        accessToken: String = "test-access-token",
+        refreshToken: String = "test-refresh-token",
+        userDto: UserDto = UserDto(idx = 1, name = "Test User", email = "test@test.com")
+    ) = AuthResponseDto(
+        accessToken = accessToken,
+        refreshToken = refreshToken,
+        user = userDto
     )
 
     /**

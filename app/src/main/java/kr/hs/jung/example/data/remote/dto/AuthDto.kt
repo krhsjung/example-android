@@ -62,7 +62,37 @@ data class ExchangeRequestDto(
     val code: String
 )
 
+/**
+ * 토큰 갱신 요청 DTO
+ *
+ * @property refreshToken 갱신에 사용할 리프레시 토큰
+ */
+@Serializable
+data class RefreshTokenRequestDto(
+    @SerialName("refreshToken")
+    val refreshToken: String
+)
+
 // ===== Response DTOs =====
+
+/**
+ * 인증 응답 DTO
+ *
+ * 로그인/회원가입/OAuth 교환 시 반환되는 JWT 토큰 + 사용자 정보입니다.
+ *
+ * @property accessToken API 인증에 사용되는 액세스 토큰
+ * @property refreshToken 토큰 갱신에 사용되는 리프레시 토큰
+ * @property user 사용자 정보
+ */
+@Serializable
+data class AuthResponseDto(
+    @SerialName("accessToken")
+    val accessToken: String,
+    @SerialName("refreshToken")
+    val refreshToken: String,
+    @SerialName("user")
+    val user: UserDto
+)
 
 /**
  * 사용자 응답 DTO

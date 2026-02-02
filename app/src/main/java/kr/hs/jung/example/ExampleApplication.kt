@@ -6,16 +6,7 @@ import android.os.Bundle
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
-import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kr.hs.jung.example.data.remote.PersistentCookieJar
 import kr.hs.jung.example.util.logger.AppLogger
 
 /**
@@ -25,49 +16,17 @@ import kr.hs.jung.example.util.logger.AppLogger
  *
  * 주요 역할:
  * - Hilt 의존성 주입 초기화
- * - CookieJar 초기화 (암호화 저장소 → 메모리)
  * - Activity 생명주기 로깅
  * - 앱 포그라운드/백그라운드 상태 감지
  */
 @HiltAndroidApp
 class ExampleApplication : Application() {
 
-    // 앱 전체 스코프 (앱 종료 시까지 유지)
-    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-
-    @EntryPoint
-    @InstallIn(SingletonComponent::class)
-    interface CookieJarEntryPoint {
-        fun cookieJar(): PersistentCookieJar
-    }
-
     override fun onCreate() {
         super.onCreate()
 
-        // CookieJar 초기화 (비동기, 메인 스레드 블로킹 없음)
-        initializeCookieJar()
-
         registerActivityLifecycleCallbacks(ActivityLifecycleCallback())
         ProcessLifecycleOwner.get().lifecycle.addObserver(AppLifecycleObserver())
-    }
-
-    /**
-     * PersistentCookieJar를 초기화합니다.
-     * 암호화 저장소에서 쿠키를 메모리로 로드합니다.
-     */
-    private fun initializeCookieJar() {
-        applicationScope.launch(Dispatchers.IO) {
-            try {
-                val entryPoint = EntryPointAccessors.fromApplication(
-                    this@ExampleApplication,
-                    CookieJarEntryPoint::class.java
-                )
-                entryPoint.cookieJar().initialize()
-                AppLogger.d("App", "CookieJar initialized successfully")
-            } catch (e: Exception) {
-                AppLogger.e("App", "Failed to initialize CookieJar: ${e.message}", e)
-            }
-        }
     }
 
     /**

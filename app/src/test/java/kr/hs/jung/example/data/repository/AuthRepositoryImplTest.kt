@@ -10,8 +10,8 @@ import io.mockk.unmockkStatic
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kr.hs.jung.example.data.local.cache.UserCache
+import kr.hs.jung.example.data.local.datastore.TokenManager
 import kr.hs.jung.example.domain.model.AppException
-import kr.hs.jung.example.data.remote.PersistentCookieJar
 import kr.hs.jung.example.data.remote.SafeApiCall
 import kr.hs.jung.example.data.remote.api.AuthApi
 import kr.hs.jung.example.data.remote.dto.LoginRequestDto
@@ -19,6 +19,7 @@ import kr.hs.jung.example.data.remote.dto.SignUpRequestDto
 import kr.hs.jung.example.data.remote.dto.UserDto
 import kr.hs.jung.example.domain.event.SessionManager
 import kr.hs.jung.example.domain.model.User
+import kr.hs.jung.example.util.TestFixtures
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.After
 import org.junit.Before
@@ -32,13 +33,14 @@ import retrofit2.Response
  * - API 호출 및 응답 처리
  * - DTO → Domain 변환
  * - 에러 케이스 처리
+ * - 토큰 저장/삭제
  * - 세션 클리어
  * - 캐싱 동작
  */
 class AuthRepositoryImplTest {
 
     private lateinit var authApi: AuthApi
-    private lateinit var cookieJar: PersistentCookieJar
+    private lateinit var tokenManager: TokenManager
     private lateinit var sessionManager: SessionManager
     private lateinit var safeApiCall: SafeApiCall
     private lateinit var userCache: UserCache
@@ -51,13 +53,14 @@ class AuthRepositoryImplTest {
         io.mockk.every { android.util.Log.e(any(), any()) } returns 0
         io.mockk.every { android.util.Log.e(any(), any(), any()) } returns 0
         io.mockk.every { android.util.Log.d(any(), any()) } returns 0
+        io.mockk.every { android.util.Log.w(any<String>(), any<String>()) } returns 0
 
         authApi = mockk()
-        cookieJar = mockk(relaxed = true)
+        tokenManager = mockk(relaxed = true)
         sessionManager = SessionManager()
         userCache = mockk(relaxed = true)
         safeApiCall = SafeApiCall(Json { ignoreUnknownKeys = true }, sessionManager)
-        repository = AuthRepositoryImpl(authApi, cookieJar, safeApiCall, userCache)
+        repository = AuthRepositoryImpl(authApi, tokenManager, safeApiCall, userCache)
     }
 
     @After
@@ -72,8 +75,10 @@ class AuthRepositoryImplTest {
     @Test
     fun `login returns mapped domain model on success`() = runTest {
         // Given
-        val userDto = UserDto(idx = 1, name = "Test User", email = "test@test.com")
-        coEvery { authApi.login(any()) } returns Response.success(userDto)
+        val authResponse = TestFixtures.createAuthResponse(
+            userDto = UserDto(idx = 1, name = "Test User", email = "test@test.com")
+        )
+        coEvery { authApi.login(any()) } returns Response.success(authResponse)
 
         // When
         val result = repository.login(LoginRequestDto("test@test.com", "password"))
@@ -87,10 +92,23 @@ class AuthRepositoryImplTest {
     }
 
     @Test
+    fun `login saves tokens on success`() = runTest {
+        // Given
+        val authResponse = TestFixtures.createAuthResponse()
+        coEvery { authApi.login(any()) } returns Response.success(authResponse)
+
+        // When
+        repository.login(LoginRequestDto("test@test.com", "password"))
+
+        // Then
+        verify { tokenManager.saveTokens(authResponse.accessToken, authResponse.refreshToken) }
+    }
+
+    @Test
     fun `login caches user on success`() = runTest {
         // Given
-        val userDto = UserDto(idx = 1, name = "Test User", email = "test@test.com")
-        coEvery { authApi.login(any()) } returns Response.success(userDto)
+        val authResponse = TestFixtures.createAuthResponse()
+        coEvery { authApi.login(any()) } returns Response.success(authResponse)
 
         // When
         repository.login(LoginRequestDto("test@test.com", "password"))
@@ -102,8 +120,8 @@ class AuthRepositoryImplTest {
     @Test
     fun `login calls api with correct request`() = runTest {
         // Given
-        val userDto = UserDto(idx = 1, name = "Test", email = "test@test.com")
-        coEvery { authApi.login(any()) } returns Response.success(userDto)
+        val authResponse = TestFixtures.createAuthResponse()
+        coEvery { authApi.login(any()) } returns Response.success(authResponse)
 
         val request = LoginRequestDto("test@test.com", "password123")
 
@@ -152,8 +170,10 @@ class AuthRepositoryImplTest {
     @Test
     fun `signUp returns mapped domain model on success`() = runTest {
         // Given
-        val userDto = UserDto(idx = 2, name = "New User", email = "new@test.com")
-        coEvery { authApi.signUp(any()) } returns Response.success(userDto)
+        val authResponse = TestFixtures.createAuthResponse(
+            userDto = UserDto(idx = 2, name = "New User", email = "new@test.com")
+        )
+        coEvery { authApi.signUp(any()) } returns Response.success(authResponse)
 
         // When
         val result = repository.signUp(SignUpRequestDto("new@test.com", "password", "New User"))
@@ -165,10 +185,23 @@ class AuthRepositoryImplTest {
     }
 
     @Test
+    fun `signUp saves tokens on success`() = runTest {
+        // Given
+        val authResponse = TestFixtures.createAuthResponse()
+        coEvery { authApi.signUp(any()) } returns Response.success(authResponse)
+
+        // When
+        repository.signUp(SignUpRequestDto("new@test.com", "password", "New User"))
+
+        // Then
+        verify { tokenManager.saveTokens(authResponse.accessToken, authResponse.refreshToken) }
+    }
+
+    @Test
     fun `signUp caches user on success`() = runTest {
         // Given
-        val userDto = UserDto(idx = 2, name = "New User", email = "new@test.com")
-        coEvery { authApi.signUp(any()) } returns Response.success(userDto)
+        val authResponse = TestFixtures.createAuthResponse()
+        coEvery { authApi.signUp(any()) } returns Response.success(authResponse)
 
         // When
         repository.signUp(SignUpRequestDto("new@test.com", "password", "New User"))
@@ -209,7 +242,7 @@ class AuthRepositoryImplTest {
     }
 
     @Test
-    fun `logout clears cache on success`() = runTest {
+    fun `logout clears tokens and cache on success`() = runTest {
         // Given
         coEvery { authApi.logout() } returns Response.success(Unit)
 
@@ -217,6 +250,7 @@ class AuthRepositoryImplTest {
         repository.logout()
 
         // Then
+        verify { tokenManager.clearTokens() }
         coVerify { userCache.clear() }
     }
 
@@ -283,12 +317,12 @@ class AuthRepositoryImplTest {
     // ========================================
 
     @Test
-    fun `clearSession calls cookieJar clear and cache clear`() = runTest {
+    fun `clearSession calls tokenManager clearTokens and cache clear`() = runTest {
         // When
         repository.clearSession()
 
         // Then
-        verify { cookieJar.clear() }
+        verify { tokenManager.clearTokens() }
         coVerify { userCache.clear() }
     }
 

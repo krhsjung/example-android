@@ -9,7 +9,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import kotlinx.coroutines.CoroutineDispatcher
 import kr.hs.jung.example.data.remote.NetworkConstants
-import kr.hs.jung.example.data.remote.PersistentCookieJar
+import kr.hs.jung.example.data.remote.AuthInterceptor
 import kr.hs.jung.example.data.remote.RetryInterceptor
 import kr.hs.jung.example.data.remote.SSLPinningConfig
 import kr.hs.jung.example.data.remote.SanitizingLoggingInterceptor
@@ -32,7 +32,7 @@ import javax.inject.Singleton
  *
  * 주요 구성요소:
  * - Json: kotlinx.serialization JSON 인스턴스
- * - OkHttpClient: 타임아웃, 재시도, 쿠키 관리 설정
+ * - OkHttpClient: 타임아웃, 재시도, JWT 인증 설정
  * - Retrofit: API 인터페이스 구현체 생성
  * - AuthApi: 인증 API 인터페이스
  */
@@ -71,8 +71,8 @@ object NetworkModule {
     fun provideOkHttpClient(
         loggingInterceptor: SanitizingLoggingInterceptor,
         retryInterceptor: RetryInterceptor,
-        connectionPool: ConnectionPool,
-        cookieJar: PersistentCookieJar
+        authInterceptor: AuthInterceptor,
+        connectionPool: ConnectionPool
     ): OkHttpClient = OkHttpClient.Builder()
         // 타임아웃 설정 (연결은 짧게, 읽기/쓰기는 길게)
         .connectTimeout(NetworkConstants.CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
@@ -80,6 +80,8 @@ object NetworkModule {
         .writeTimeout(NetworkConstants.WRITE_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         // 연결 풀 설정 (연결 재사용으로 성능 향상)
         .connectionPool(connectionPool)
+        // JWT 인증 인터셉터 (Bearer 토큰 주입 + 401 자동 갱신)
+        .addInterceptor(authInterceptor as Interceptor)
         // 재시도 인터셉터 (네트워크 인터셉터로 추가)
         .addInterceptor(retryInterceptor)
         // 로깅 인터셉터 (Debug 빌드에서만)
@@ -90,8 +92,6 @@ object NetworkModule {
         }
         // SSL 인증서 피닝 (핀이 비어있으면 기본 SSL 검증)
         .certificatePinner(SSLPinningConfig.createCertificatePinner())
-        // 쿠키 관리
-        .cookieJar(cookieJar)
         // 리다이렉트 자동 처리
         .followRedirects(true)
         .followSslRedirects(true)

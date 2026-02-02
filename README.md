@@ -6,18 +6,18 @@ Jetpack Compose 기반 Android 앱 프로젝트입니다. Clean Architecture와 
 
 ## 기술 스택
 
-| 영역         | 기술                                                     |
-| ------------ | -------------------------------------------------------- |
-| UI           | Jetpack Compose, Material 3                              |
-| Architecture | Clean Architecture, MVVM                                 |
-| DI           | Hilt (Dagger)                                            |
-| Networking   | Retrofit 2, OkHttp 4, kotlinx.serialization              |
-| Async        | Kotlin Coroutines, Flow                                  |
-| Storage      | DataStore, EncryptedSharedPreferences                    |
-| Security     | SSL Pinning (CertificatePinner), AES-256-GCM 쿠키 암호화 |
-| Navigation   | Jetpack Navigation Compose                               |
-| Test         | JUnit 4, MockK, Truth, Turbine, Compose UI Test          |
-| Build        | Kotlin DSL, Version Catalog, Baseline Profiles           |
+| 영역         | 기술                                                         |
+| ------------ | ------------------------------------------------------------ |
+| UI           | Jetpack Compose, Material 3                                  |
+| Architecture | Clean Architecture, MVVM                                     |
+| DI           | Hilt (Dagger)                                                |
+| Networking   | Retrofit 2, OkHttp 4, kotlinx.serialization                  |
+| Async        | Kotlin Coroutines, Flow                                      |
+| Storage      | DataStore, EncryptedSharedPreferences                        |
+| Security     | SSL Pinning (CertificatePinner), AES-256-GCM JWT 토큰 암호화 |
+| Navigation   | Jetpack Navigation Compose                                   |
+| Test         | JUnit 4, MockK, Truth, Turbine, Compose UI Test              |
+| Build        | Kotlin DSL, Version Catalog, Baseline Profiles               |
 
 ---
 
@@ -56,7 +56,7 @@ Jetpack Compose 기반 Android 앱 프로젝트입니다. Clean Architecture와 
 
 ```
 app/src/main/java/kr/hs/jung/example/
-├── ExampleApplication.kt              # Hilt 초기화, CookieJar 초기화, 생명주기 관리
+├── ExampleApplication.kt              # Hilt 초기화, 생명주기 관리
 │
 ├── domain/                            # Domain Layer (플랫폼 독립)
 │   ├── model/                         # 도메인 모델
@@ -86,10 +86,10 @@ app/src/main/java/kr/hs/jung/example/
 │   │   ├── api/AuthApi.kt            #   Retrofit 인터페이스
 │   │   ├── dto/                       #   DTO (AuthDto, ServerErrorResponseDto)
 │   │   ├── SafeApiCall.kt            #   에러 매핑 + 세션 처리
+│   │   ├── AuthInterceptor.kt       #   JWT 인증 (Bearer 토큰 주입 + 401 자동 갱신)
 │   │   ├── RetryInterceptor.kt       #   지수 백오프 + Jitter 재시도
 │   │   ├── SanitizingLoggingInterceptor.kt  # 민감 정보 마스킹 로깅
 │   │   ├── SSLPinningConfig.kt       #   SSL 인증서 피닝 설정
-│   │   ├── PersistentCookieJar.kt    #   암호화 쿠키 저장 (메모리 + 디스크)
 │   │   ├── OAuthHelper.kt            #   OAuth (Chrome Custom Tabs)
 │   │   └── NetworkConstants.kt       #   네트워크 상수
 │   ├── local/                         # 로컬 저장소
@@ -99,8 +99,7 @@ app/src/main/java/kr/hs/jung/example/
 │   │   │   ├── DiskCache.kt          #     DataStore 디스크 캐시
 │   │   │   └── UserCache.kt          #     사용자 정보 2-tier 캐시
 │   │   └── datastore/
-│   │       ├── CookieDataStore.kt    #     쿠키 데이터 모델 (CookieProto/CookieStore)
-│   │       └── EncryptedCookieStorage.kt  # AES-256-GCM 암호화 쿠키 저장소
+│   │       └── TokenManager.kt      #     AES-256-GCM 암호화 JWT 토큰 저장소
 │   └── repository/
 │       └── AuthRepositoryImpl.kt      #   Repository 구현체 (캐시 전략 포함)
 │
@@ -180,7 +179,8 @@ app/src/main/java/kr/hs/jung/example/
 
 ## 보안
 
-- **쿠키 암호화**: `EncryptedSharedPreferences` (AES-256-GCM) 기반 쿠키 저장
+- **JWT 토큰 암호화**: `EncryptedSharedPreferences` (AES-256-GCM) 기반 JWT 토큰 저장
+- **자동 토큰 갱신**: `AuthInterceptor`에서 401 응답 시 refreshToken으로 자동 갱신 + 동시성 제어
 - **SSL Pinning**: `CertificatePinner` 구조 구현 (해시 추가 시 활성화)
 - **로그 마스킹**: 네트워크 로그에서 password, token 등 민감 필드 자동 마스킹
 - **비밀번호 해싱**: 클라이언트 SHA-512 → 서버 Argon2 이중 해싱 (평문 전송 방지)
@@ -197,7 +197,6 @@ app/src/main/java/kr/hs/jung/example/
 ### 기능
 
 - [ ] 메인 화면 탭 네비게이션 콘텐츠 구현
-- [ ] 토큰 갱신 (Refresh Token) 로직 구현
 
 ### 네트워크
 

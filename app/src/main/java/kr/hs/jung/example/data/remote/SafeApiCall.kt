@@ -19,7 +19,7 @@ import javax.inject.Singleton
  * Domain 레이어에서 플랫폼 독립적인 AppError를 사용할 수 있도록 합니다.
  *
  * 강화된 에러 처리:
- * - 401 Unauthorized: 세션 만료 이벤트 발생 → 자동 로그아웃 트리거
+ * - 401 Unauthorized: AuthInterceptor에서 토큰 갱신 처리, 실패 시 에러 반환
  * - 403 Forbidden: 접근 거부 이벤트 발생
  * - 429 Too Many Requests: Rate Limit 초과, Retry-After 헤더 파싱
  */
@@ -85,8 +85,9 @@ class SafeApiCall @Inject constructor(
         // HTTP 상태 코드 기반 에러 처리
         when (statusCode) {
             HTTP_UNAUTHORIZED -> {
-                AppLogger.w(TAG, "401 Unauthorized - triggering session expired event")
-                sessionManager.notifySessionExpired()
+                // 401은 AuthInterceptor에서 토큰 갱신 후 재시도 처리
+                // 여기까지 도달하면 갱신도 실패한 것이므로 에러만 반환
+                AppLogger.w(TAG, "401 Unauthorized - token refresh failed or no token")
                 return AppError.Auth.SessionExpired
             }
             HTTP_FORBIDDEN -> {
