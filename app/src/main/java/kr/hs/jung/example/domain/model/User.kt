@@ -1,5 +1,8 @@
 package kr.hs.jung.example.domain.model
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
 /**
  * 사용자 정보 모델
  *
@@ -25,11 +28,13 @@ data class User(
  * 로그인 제공자 타입
  *
  * 사용자가 가입/로그인한 방식을 나타냅니다.
+ * kotlinx.serialization에서 value 값으로 직렬화됩니다.
  */
+@Serializable
 enum class LoginProvider(val value: String) {
-    EMAIL("email"),
-    GOOGLE("google"),
-    APPLE("apple")
+    @SerialName("email") EMAIL("email"),
+    @SerialName("google") GOOGLE("google"),
+    @SerialName("apple") APPLE("apple")
 }
 
 /**

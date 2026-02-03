@@ -19,7 +19,7 @@ import kr.hs.jung.example.domain.model.User
  *
  * @property email 사용자 이메일
  * @property password 해싱된 비밀번호
- * @property provider 로그인 제공자 (기본값: "email")
+ * @property provider 로그인 제공자 (기본값: EMAIL)
  */
 @Serializable
 data class LoginRequestDto(
@@ -28,7 +28,7 @@ data class LoginRequestDto(
     @SerialName("password")
     val password: String,
     @SerialName("provider")
-    val provider: String = "email"
+    val provider: LoginProvider = LoginProvider.EMAIL
 )
 
 /**
@@ -37,7 +37,7 @@ data class LoginRequestDto(
  * @property email 사용자 이메일
  * @property password 해싱된 비밀번호
  * @property name 사용자 이름
- * @property provider 로그인 제공자 (기본값: "email")
+ * @property provider 로그인 제공자 (기본값: EMAIL)
  */
 @Serializable
 data class SignUpRequestDto(
@@ -48,7 +48,7 @@ data class SignUpRequestDto(
     @SerialName("name")
     val name: String,
     @SerialName("provider")
-    val provider: String = "email"
+    val provider: LoginProvider = LoginProvider.EMAIL
 )
 
 /**
