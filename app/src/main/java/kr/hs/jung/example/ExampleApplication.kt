@@ -34,7 +34,7 @@ class ExampleApplication : Application() {
      *
      * 개별 Activity의 생명주기를 추적할 때 사용
      */
-    private inner class ActivityLifecycleCallback : ActivityLifecycleCallbacks {
+    private class ActivityLifecycleCallback : ActivityLifecycleCallbacks {
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
             AppLogger.d("App", "Activity created: ${activity::class.java.simpleName}")
         }
@@ -71,7 +71,7 @@ class ExampleApplication : Application() {
      * - onStart: 앱이 포그라운드로 진입
      * - onStop: 앱이 백그라운드로 진입
      */
-    private inner class AppLifecycleObserver : DefaultLifecycleObserver {
+    private class AppLifecycleObserver : DefaultLifecycleObserver {
         override fun onCreate(owner: LifecycleOwner) {
             AppLogger.d("App", "App lifecycle: onCreate")
         }

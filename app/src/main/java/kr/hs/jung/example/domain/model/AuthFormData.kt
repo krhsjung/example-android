@@ -53,7 +53,7 @@ data class SignUpFormData(
 object AuthValidator {
     private const val PASSWORD_MIN_LENGTH = 8
     private const val NAME_MIN_LENGTH = 2
-    private const val SPECIAL_CHARACTERS = "!@#\$%^&*()_+-=[]{}|;':\",./<>?`~"
+    private const val SPECIAL_CHARACTERS = "!@#$%^&*()_+-=[]{}|;':\",./<>?`~"
 
     // Android-independent email regex pattern
     private val EMAIL_PATTERN = Regex(

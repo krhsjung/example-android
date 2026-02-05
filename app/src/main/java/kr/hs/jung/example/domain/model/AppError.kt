@@ -107,9 +107,8 @@ sealed class AppError {
          * Throwable을 AppError로 변환
          */
         fun from(error: Throwable): AppError {
-            return when {
-                error is AppError -> error
-                error.cause is AppError -> error.cause as AppError
+            return when (val cause = error.cause) {
+                is AppError -> cause
                 else -> Generic(message = error.message, cause = error)
             }
         }

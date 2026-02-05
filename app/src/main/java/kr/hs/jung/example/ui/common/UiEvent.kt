@@ -21,7 +21,7 @@ import kotlinx.coroutines.withContext
  * @param onEvent 이벤트 발생 시 호출되는 콜백
  */
 @Composable
-fun <T> Flow<T>.collectAsEvent(
+fun <T> Flow<T>.CollectAsEvent(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
     onEvent: (T) -> Unit
@@ -44,7 +44,7 @@ fun <T> Flow<T>.collectAsEvent(
  * @param onEvent 이벤트 발생 시 호출되는 콜백
  */
 @Composable
-fun <T> Flow<T>.collectAsEventSimple(onEvent: (T) -> Unit) {
+fun <T> Flow<T>.CollectAsEventSimple(onEvent: (T) -> Unit) {
     LaunchedEffect(Unit) {
         collect { event ->
             onEvent(event)
@@ -61,7 +61,7 @@ fun <T> Flow<T>.collectAsEventSimple(onEvent: (T) -> Unit) {
  * @param onEvent 이벤트 발생 시 Main 스레드에서 호출되는 콜백
  */
 @Composable
-fun <T> Flow<T>.collectAsEventOnMain(
+fun <T> Flow<T>.CollectAsEventOnMain(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onEvent: (T) -> Unit
 ) {
@@ -74,4 +74,18 @@ fun <T> Flow<T>.collectAsEventOnMain(
             }
         }
     }
+}
+
+/**
+ * Lifecycle-aware 이벤트 수집 확장 함수 (소문자 버전)
+ *
+ * CollectAsEvent의 소문자 별칭입니다.
+ */
+@Composable
+fun <T> Flow<T>.collectAsEvent(
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
+    onEvent: (T) -> Unit
+) {
+    CollectAsEvent(lifecycleOwner, minActiveState, onEvent)
 }

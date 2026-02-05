@@ -71,7 +71,7 @@ class LogInViewModel @Inject constructor(
                 logInUseCase(currentState.email, currentState.password)
                     .onSuccess { sendEvent(LogInEvent.Success) }
                     .onFailure { error ->
-                        updateState { copy(error = error.appError() ?: AppError.Auth.InvalidCredentials) }
+                        updateState { copy(error = error.appError()) }
                     }
             }
         }

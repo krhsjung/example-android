@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kr.hs.jung.example.R
 import kr.hs.jung.example.data.remote.OAuthHelper
-import kr.hs.jung.example.domain.model.AppError
 import kr.hs.jung.example.domain.model.SnsProvider
 import kr.hs.jung.example.domain.model.appError
 import kr.hs.jung.example.domain.usecase.auth.ExchangeOAuthCodeUseCase
