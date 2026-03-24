@@ -26,8 +26,9 @@ sealed class DeepLinkResult {
     /**
      * 앱 내 화면 네비게이션
      * @property path 이동할 경로
+     * @property email 사전 입력할 이메일 (선택)
      */
-    data class Navigation(val path: String) : DeepLinkResult()
+    data class Navigation(val path: String, val email: String? = null) : DeepLinkResult()
 
     /**
      * 알 수 없는 Deep Link
@@ -82,7 +83,10 @@ object DeepLinkHandler {
     fun handle(uri: Uri): DeepLinkResult {
         return when {
             DeepLinkConfig.isOAuthCallback(uri) -> handleOAuthCallback(uri)
-            DeepLinkConfig.isSignUp(uri) -> DeepLinkResult.Navigation(DeepLinkConfig.Path.SIGNUP)
+            DeepLinkConfig.isSignUp(uri) -> {
+                val email = uri.getQueryParameter("email")
+                DeepLinkResult.Navigation(DeepLinkConfig.Path.SIGNUP, email = email)
+            }
             uri.scheme == DeepLinkConfig.SCHEME -> DeepLinkResult.Unknown(uri)
             else -> DeepLinkResult.NotDeepLink
         }

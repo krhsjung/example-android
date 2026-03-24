@@ -12,7 +12,7 @@ sealed interface AuthRoute {
     @Serializable
     data object LogIn : AuthRoute
 
-    /** 회원가입 화면 */
+    /** 회원가입 화면 (이메일 사전 입력 가능) */
     @Serializable
-    data object SignUp : AuthRoute
+    data class SignUp(val email: String? = null) : AuthRoute
 }

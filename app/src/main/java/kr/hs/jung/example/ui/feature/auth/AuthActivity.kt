@@ -24,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -72,6 +73,9 @@ class AuthActivity : ComponentActivity() {
     /** 딥링크로 인한 초기 네비게이션 경로 */
     private var pendingNavigation: String? = null
 
+    /** 딥링크에서 전달받은 이메일 (사전 입력용) */
+    private var pendingEmail: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -113,7 +117,7 @@ class AuthActivity : ComponentActivity() {
                     // Predictive Back 지원을 위한 트랜지션 애니메이션
                     val animationDuration = 300
                     val startDestination: AuthRoute = if (pendingNavigation == DeepLinkConfig.Path.SIGNUP) {
-                        AuthRoute.SignUp
+                        AuthRoute.SignUp(email = pendingEmail)
                     } else {
                         AuthRoute.LogIn
                     }
@@ -156,7 +160,7 @@ class AuthActivity : ComponentActivity() {
                                 isDarkTheme = isDarkTheme,
                                 onToggleTheme = { isDarkTheme = !isDarkTheme },
                                 onNavigateToSignUp = {
-                                    navController.navigate(AuthRoute.SignUp)
+                                    navController.navigate(AuthRoute.SignUp())
                                 },
                                 onLogInSuccess = {
                                     navigateToMain()
@@ -167,7 +171,8 @@ class AuthActivity : ComponentActivity() {
                             )
                         }
 
-                        composable<AuthRoute.SignUp> {
+                        composable<AuthRoute.SignUp> { backStackEntry ->
+                            val route = backStackEntry.toRoute<AuthRoute.SignUp>()
                             SignUpScreen(
                                 onNavigateBack = {
                                     navController.popBackStack()
@@ -177,7 +182,8 @@ class AuthActivity : ComponentActivity() {
                                 },
                                 onOAuthRequest = { provider ->
                                     launchOAuth(provider)
-                                }
+                                },
+                                prefillEmail = route.email
                             )
                         }
                     }
@@ -220,8 +226,9 @@ class AuthActivity : ComponentActivity() {
                 false
             }
             is DeepLinkResult.Navigation -> {
-                AppLogger.d("AuthActivity", "Navigation deep link: ${result.path}")
+                AppLogger.d("AuthActivity", "Navigation deep link: ${result.path}, email: ${result.email}")
                 pendingNavigation = result.path
+                pendingEmail = result.email
                 false // setContent 진행
             }
             is DeepLinkResult.Unknown -> {

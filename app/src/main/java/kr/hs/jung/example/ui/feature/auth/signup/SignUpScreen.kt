@@ -66,10 +66,18 @@ fun SignUpScreen(
     onNavigateBack: () -> Unit = {},
     onSignUpSuccess: () -> Unit = {},
     onOAuthRequest: (LoginProvider) -> Unit = {},
+    prefillEmail: String? = null,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // 딥링크에서 전달받은 이메일 사전 입력
+    LaunchedEffect(prefillEmail) {
+        if (!prefillEmail.isNullOrBlank()) {
+            viewModel.updateEmail(prefillEmail)
+        }
+    }
 
     // Event 기반 일회성 이벤트 처리
     viewModel.event.collectAsEvent { event ->
