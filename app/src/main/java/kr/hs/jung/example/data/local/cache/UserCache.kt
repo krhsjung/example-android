@@ -127,48 +127,6 @@ class UserCache @Inject constructor(
         diskCache.clear()
     }
 
-    /**
-     * 캐시가 유효한지 확인합니다.
-     */
-    suspend fun isValid(): Boolean {
-        return memoryCache.isValid() || diskCache.isValid()
-    }
-
-    /**
-     * 캐시에서 값을 가져오거나, 없으면 loader를 실행합니다.
-     *
-     * @param loader 캐시 미스 시 실행할 로더 (네트워크 요청 등)
-     * @return 사용자 정보 또는 null
-     */
-    suspend fun getOrLoad(loader: suspend () -> User?): User? {
-        // 캐시 조회
-        get()?.let { return it }
-
-        // 캐시 미스: 로더 실행
-        val user = loader() ?: return null
-
-        // 캐시 저장
-        set(user)
-        return user
-    }
-
-    /**
-     * 캐시에서 값을 가져오거나, 없으면 loader를 실행합니다.
-     * Result를 반환하는 loader를 지원합니다.
-     *
-     * @param loader 캐시 미스 시 실행할 로더
-     * @return Result<User>
-     */
-    suspend fun getOrLoadResult(loader: suspend () -> Result<User>): Result<User> {
-        // 캐시 조회
-        get()?.let { return Result.success(it) }
-
-        // 캐시 미스: 로더 실행
-        return loader().onSuccess { user ->
-            set(user)
-        }
-    }
-
     companion object {
         private const val TAG = "UserCache"
         private const val CACHE_KEY = "current_user"

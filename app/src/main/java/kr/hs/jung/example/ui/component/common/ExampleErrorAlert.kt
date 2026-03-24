@@ -1,4 +1,4 @@
-package kr.hs.jung.example.ui.component.dialog
+package kr.hs.jung.example.ui.component.common
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text

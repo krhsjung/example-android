@@ -14,8 +14,6 @@ import kr.hs.jung.example.data.local.datastore.TokenManager
 import kr.hs.jung.example.domain.model.AppException
 import kr.hs.jung.example.data.remote.SafeApiCall
 import kr.hs.jung.example.data.remote.api.AuthApi
-import kr.hs.jung.example.data.remote.dto.LoginRequestDto
-import kr.hs.jung.example.data.remote.dto.SignUpRequestDto
 import kr.hs.jung.example.data.remote.dto.UserDto
 import kr.hs.jung.example.domain.event.SessionManager
 import kr.hs.jung.example.domain.model.User
@@ -81,7 +79,7 @@ class AuthRepositoryImplTest {
         coEvery { authApi.login(any()) } returns Response.success(authResponse)
 
         // When
-        val result = repository.login(LoginRequestDto("test@test.com", "password"))
+        val result = repository.login("test@test.com", "password")
 
         // Then
         assertThat(result.isSuccess).isTrue()
@@ -98,7 +96,7 @@ class AuthRepositoryImplTest {
         coEvery { authApi.login(any()) } returns Response.success(authResponse)
 
         // When
-        repository.login(LoginRequestDto("test@test.com", "password"))
+        repository.login("test@test.com", "password")
 
         // Then
         verify { tokenManager.saveTokens(authResponse.accessToken, authResponse.refreshToken) }
@@ -111,7 +109,7 @@ class AuthRepositoryImplTest {
         coEvery { authApi.login(any()) } returns Response.success(authResponse)
 
         // When
-        repository.login(LoginRequestDto("test@test.com", "password"))
+        repository.login("test@test.com", "password")
 
         // Then
         coVerify { userCache.set(any()) }
@@ -123,13 +121,11 @@ class AuthRepositoryImplTest {
         val authResponse = TestFixtures.createAuthResponse()
         coEvery { authApi.login(any()) } returns Response.success(authResponse)
 
-        val request = LoginRequestDto("test@test.com", "password123")
-
         // When
-        repository.login(request)
+        repository.login("test@test.com", "password123")
 
         // Then
-        coVerify { authApi.login(request) }
+        coVerify { authApi.login(any()) }
     }
 
     @Test
@@ -141,7 +137,7 @@ class AuthRepositoryImplTest {
         )
 
         // When
-        val result = repository.login(LoginRequestDto("test@test.com", "wrong"))
+        val result = repository.login("test@test.com", "wrong")
 
         // Then
         assertThat(result.isFailure).isTrue()
@@ -157,7 +153,7 @@ class AuthRepositoryImplTest {
         )
 
         // When
-        val result = repository.login(LoginRequestDto("test@test.com", "password"))
+        val result = repository.login("test@test.com", "password")
 
         // Then
         assertThat(result.isFailure).isTrue()
@@ -176,7 +172,7 @@ class AuthRepositoryImplTest {
         coEvery { authApi.signUp(any()) } returns Response.success(authResponse)
 
         // When
-        val result = repository.signUp(SignUpRequestDto("new@test.com", "password", "New User"))
+        val result = repository.signUp("new@test.com", "password", "New User")
 
         // Then
         assertThat(result.isSuccess).isTrue()
@@ -191,7 +187,7 @@ class AuthRepositoryImplTest {
         coEvery { authApi.signUp(any()) } returns Response.success(authResponse)
 
         // When
-        repository.signUp(SignUpRequestDto("new@test.com", "password", "New User"))
+        repository.signUp("new@test.com", "password", "New User")
 
         // Then
         verify { tokenManager.saveTokens(authResponse.accessToken, authResponse.refreshToken) }
@@ -204,7 +200,7 @@ class AuthRepositoryImplTest {
         coEvery { authApi.signUp(any()) } returns Response.success(authResponse)
 
         // When
-        repository.signUp(SignUpRequestDto("new@test.com", "password", "New User"))
+        repository.signUp("new@test.com", "password", "New User")
 
         // Then
         coVerify { userCache.set(any()) }
@@ -219,7 +215,7 @@ class AuthRepositoryImplTest {
         )
 
         // When
-        val result = repository.signUp(SignUpRequestDto("existing@test.com", "password", "User"))
+        val result = repository.signUp("existing@test.com", "password", "User")
 
         // Then
         assertThat(result.isFailure).isTrue()

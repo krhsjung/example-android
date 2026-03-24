@@ -10,32 +10,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import kr.hs.jung.example.R
-import kr.hs.jung.example.domain.model.SnsProvider
-import kr.hs.jung.example.ui.component.button.SnsLoginButton
+import kr.hs.jung.example.domain.model.LoginProvider
+import kr.hs.jung.example.ui.component.common.SocialLoginButton
 import kr.hs.jung.example.ui.theme.Dimensions
 import kr.hs.jung.example.ui.theme.ExampleAndroidTheme
 
+/**
+ * 소셜 로그인 버튼 그룹 (텍스트+아이콘 Column 레이아웃)
+ *
+ * 로그인 화면에서 사용
+ */
 @Composable
 fun SocialLoginButtons(
-    onSnsLogin: (SnsProvider) -> Unit,
+    onSocialLogin: (LoginProvider) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // 람다 안정화 - 리컴포지션 시 람다 재생성 방지
-    val onGoogleClick = remember(onSnsLogin) { { onSnsLogin(SnsProvider.GOOGLE) } }
-    val onAppleClick = remember(onSnsLogin) { { onSnsLogin(SnsProvider.APPLE) } }
+    val onGoogleClick = remember(onSocialLogin) { { onSocialLogin(LoginProvider.GOOGLE) } }
+    val onAppleClick = remember(onSocialLogin) { { onSocialLogin(LoginProvider.APPLE) } }
 
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Dimensions.SpacingSmall, Alignment.Top),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        SnsLoginButton(
+        SocialLoginButton(
             title = stringResource(R.string.oauth_google),
             icon = R.drawable.ic_google,
             onClick = onGoogleClick
         )
 
-        SnsLoginButton(
+        SocialLoginButton(
             title = stringResource(R.string.oauth_apple),
             icon = R.drawable.ic_apple,
             onClick = onAppleClick
@@ -48,8 +53,8 @@ fun SocialLoginButtons(
 private fun SocialLoginButtonsPreview() {
     ExampleAndroidTheme {
         SocialLoginButtons(
-            onSnsLogin = { provider ->
-                println("SNS Login: $provider")
+            onSocialLogin = { provider ->
+                println("Social Login: $provider")
             }
         )
     }

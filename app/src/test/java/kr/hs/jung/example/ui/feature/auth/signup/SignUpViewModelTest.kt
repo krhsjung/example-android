@@ -7,7 +7,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import kr.hs.jung.example.domain.model.SnsProvider
+import kr.hs.jung.example.domain.model.LoginProvider
 import kr.hs.jung.example.domain.usecase.auth.SignUpUseCase
 import kr.hs.jung.example.util.BaseViewModelTest
 import kr.hs.jung.example.util.TestFixtures
@@ -131,7 +131,7 @@ class SignUpViewModelTest : BaseViewModelTest() {
 
         viewModel.signUp()
 
-        viewModel.uiState.assertPropertyIsNotNull { it.error }
+        viewModel.uiState.assertPropertyIsNotNull { it.emailError }
         coVerify(exactly = 0) { signUpUseCase(any(), any(), any()) }
     }
 
@@ -145,7 +145,7 @@ class SignUpViewModelTest : BaseViewModelTest() {
 
         viewModel.signUp()
 
-        viewModel.uiState.assertPropertyIsNotNull { it.error }
+        viewModel.uiState.assertPropertyIsNotNull { it.confirmPasswordError }
         coVerify(exactly = 0) { signUpUseCase(any(), any(), any()) }
     }
 
@@ -216,9 +216,9 @@ class SignUpViewModelTest : BaseViewModelTest() {
     @Test
     fun `signInWith emits OAuthRequest event`() = runTest {
         viewModel.event.collectEvent(
-            action = { viewModel.signInWith(SnsProvider.GOOGLE) },
+            action = { viewModel.signInWith(LoginProvider.GOOGLE) },
             assertion = { event ->
-                assertThat(event).isEqualTo(SignUpEvent.OAuthRequest(SnsProvider.GOOGLE))
+                assertThat(event).isEqualTo(SignUpEvent.OAuthRequest(LoginProvider.GOOGLE))
             }
         )
     }
@@ -226,11 +226,11 @@ class SignUpViewModelTest : BaseViewModelTest() {
     @Test
     fun `signInWith with different providers emits correct events`() = runTest {
         viewModel.event.test {
-            viewModel.signInWith(SnsProvider.GOOGLE)
-            assertThat(awaitItem()).isEqualTo(SignUpEvent.OAuthRequest(SnsProvider.GOOGLE))
+            viewModel.signInWith(LoginProvider.GOOGLE)
+            assertThat(awaitItem()).isEqualTo(SignUpEvent.OAuthRequest(LoginProvider.GOOGLE))
 
-            viewModel.signInWith(SnsProvider.APPLE)
-            assertThat(awaitItem()).isEqualTo(SignUpEvent.OAuthRequest(SnsProvider.APPLE))
+            viewModel.signInWith(LoginProvider.APPLE)
+            assertThat(awaitItem()).isEqualTo(SignUpEvent.OAuthRequest(LoginProvider.APPLE))
         }
     }
 
@@ -240,8 +240,13 @@ class SignUpViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `clearError clears error from state`() = runTest {
-        // Given: 에러가 있는 상태
-        viewModel.updateEmail("")
+        // Given: 서버 에러가 있는 상태
+        coEvery { signUpUseCase(any(), any(), any()) } returns Result.failure(Exception("SignUp failed"))
+        viewModel.updateEmail("test@test.com")
+        viewModel.updatePassword("ValidPass123!")
+        viewModel.updateConfirmPassword("ValidPass123!")
+        viewModel.updateName("Test User")
+        viewModel.updateAgreeToTerms(true)
         viewModel.signUp()
         viewModel.uiState.assertPropertyIsNotNull { it.error }
 

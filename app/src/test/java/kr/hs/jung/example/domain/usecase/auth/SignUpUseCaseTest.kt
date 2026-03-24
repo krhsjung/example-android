@@ -6,7 +6,6 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.test.runTest
-import kr.hs.jung.example.data.remote.dto.SignUpRequestDto
 import kr.hs.jung.example.domain.repository.AuthRepository
 import kr.hs.jung.example.domain.service.PasswordHasher
 import kr.hs.jung.example.ui.common.state.AuthManager
@@ -36,34 +35,39 @@ class SignUpUseCaseTest {
     fun `invoke trims email and name before sending`() = runTest {
         // Given
         val testUser = TestFixtures.createUser()
-        val requestSlot = slot<SignUpRequestDto>()
+        val emailSlot = slot<String>()
+        val nameSlot = slot<String>()
 
         coEvery { passwordHasher.hash(any()) } returns "hashedPassword"
-        coEvery { authRepository.signUp(capture(requestSlot)) } returns Result.success(testUser)
+        coEvery {
+            authRepository.signUp(capture(emailSlot), any(), capture(nameSlot))
+        } returns Result.success(testUser)
 
         // When
         useCase("  test@test.com  ", "password", "  Test User  ")
 
         // Then
-        assertThat(requestSlot.captured.email).isEqualTo("test@test.com")
-        assertThat(requestSlot.captured.name).isEqualTo("Test User")
+        assertThat(emailSlot.captured).isEqualTo("test@test.com")
+        assertThat(nameSlot.captured).isEqualTo("Test User")
     }
 
     @Test
     fun `invoke hashes password before sending`() = runTest {
         // Given
         val testUser = TestFixtures.createUser()
-        val requestSlot = slot<SignUpRequestDto>()
+        val passwordSlot = slot<String>()
 
         coEvery { passwordHasher.hash("rawPassword") } returns "hashedPassword123"
-        coEvery { authRepository.signUp(capture(requestSlot)) } returns Result.success(testUser)
+        coEvery {
+            authRepository.signUp(any(), capture(passwordSlot), any())
+        } returns Result.success(testUser)
 
         // When
         useCase("test@test.com", "rawPassword", "Test User")
 
         // Then
         coVerify { passwordHasher.hash("rawPassword") }
-        assertThat(requestSlot.captured.password).isEqualTo("hashedPassword123")
+        assertThat(passwordSlot.captured).isEqualTo("hashedPassword123")
     }
 
     @Test
@@ -71,7 +75,7 @@ class SignUpUseCaseTest {
         // Given
         val testUser = TestFixtures.createUser()
         coEvery { passwordHasher.hash(any()) } returns "hashedPassword"
-        coEvery { authRepository.signUp(any()) } returns Result.success(testUser)
+        coEvery { authRepository.signUp(any(), any(), any()) } returns Result.success(testUser)
 
         // When
         val result = useCase("test@test.com", "password", "Test User")
@@ -85,7 +89,7 @@ class SignUpUseCaseTest {
     fun `invoke does not save user to AuthManager on failure`() = runTest {
         // Given
         coEvery { passwordHasher.hash(any()) } returns "hashedPassword"
-        coEvery { authRepository.signUp(any()) } returns Result.failure(Exception("SignUp failed"))
+        coEvery { authRepository.signUp(any(), any(), any()) } returns Result.failure(Exception("SignUp failed"))
 
         // When
         val result = useCase("test@test.com", "password", "Test User")
@@ -100,7 +104,7 @@ class SignUpUseCaseTest {
         // Given
         val testUser = TestFixtures.createUser(name = "Test User")
         coEvery { passwordHasher.hash(any()) } returns "hashedPassword"
-        coEvery { authRepository.signUp(any()) } returns Result.success(testUser)
+        coEvery { authRepository.signUp(any(), any(), any()) } returns Result.success(testUser)
 
         // When
         val result = useCase("test@test.com", "password", "Test User")
@@ -115,7 +119,7 @@ class SignUpUseCaseTest {
         // Given
         val exception = Exception("Email already exists")
         coEvery { passwordHasher.hash(any()) } returns "hashedPassword"
-        coEvery { authRepository.signUp(any()) } returns Result.failure(exception)
+        coEvery { authRepository.signUp(any(), any(), any()) } returns Result.failure(exception)
 
         // When
         val result = useCase("test@test.com", "password", "Test User")

@@ -6,7 +6,6 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.test.runTest
-import kr.hs.jung.example.data.remote.dto.LoginRequestDto
 import kr.hs.jung.example.domain.repository.AuthRepository
 import kr.hs.jung.example.domain.service.PasswordHasher
 import kr.hs.jung.example.ui.common.state.AuthManager
@@ -42,33 +41,33 @@ class LogInUseCaseTest {
     fun `invoke trims email before sending`() = runTest {
         // Given
         val testUser = TestFixtures.createUser()
-        val requestSlot = slot<LoginRequestDto>()
+        val emailSlot = slot<String>()
 
         coEvery { passwordHasher.hash(any()) } returns "hashedPassword"
-        coEvery { authRepository.login(capture(requestSlot)) } returns Result.success(testUser)
+        coEvery { authRepository.login(capture(emailSlot), any()) } returns Result.success(testUser)
 
         // When
         useCase("  test@test.com  ", "password")
 
         // Then
-        assertThat(requestSlot.captured.email).isEqualTo("test@test.com")
+        assertThat(emailSlot.captured).isEqualTo("test@test.com")
     }
 
     @Test
     fun `invoke hashes password before sending`() = runTest {
         // Given
         val testUser = TestFixtures.createUser()
-        val requestSlot = slot<LoginRequestDto>()
+        val passwordSlot = slot<String>()
 
         coEvery { passwordHasher.hash("rawPassword") } returns "hashedPassword123"
-        coEvery { authRepository.login(capture(requestSlot)) } returns Result.success(testUser)
+        coEvery { authRepository.login(any(), capture(passwordSlot)) } returns Result.success(testUser)
 
         // When
         useCase("test@test.com", "rawPassword")
 
         // Then
         coVerify { passwordHasher.hash("rawPassword") }
-        assertThat(requestSlot.captured.password).isEqualTo("hashedPassword123")
+        assertThat(passwordSlot.captured).isEqualTo("hashedPassword123")
     }
 
     @Test
@@ -76,13 +75,13 @@ class LogInUseCaseTest {
         // Given
         val testUser = TestFixtures.createUser()
         coEvery { passwordHasher.hash(any()) } returns "hashedPassword"
-        coEvery { authRepository.login(any()) } returns Result.success(testUser)
+        coEvery { authRepository.login(any(), any()) } returns Result.success(testUser)
 
         // When
         useCase("test@test.com", "password")
 
         // Then
-        coVerify { authRepository.login(any()) }
+        coVerify { authRepository.login(any(), any()) }
     }
 
     @Test
@@ -90,7 +89,7 @@ class LogInUseCaseTest {
         // Given
         val testUser = TestFixtures.createUser()
         coEvery { passwordHasher.hash(any()) } returns "hashedPassword"
-        coEvery { authRepository.login(any()) } returns Result.success(testUser)
+        coEvery { authRepository.login(any(), any()) } returns Result.success(testUser)
 
         // When
         val result = useCase("test@test.com", "password")
@@ -104,7 +103,7 @@ class LogInUseCaseTest {
     fun `invoke does not save user to AuthManager on failure`() = runTest {
         // Given
         coEvery { passwordHasher.hash(any()) } returns "hashedPassword"
-        coEvery { authRepository.login(any()) } returns Result.failure(Exception("Login failed"))
+        coEvery { authRepository.login(any(), any()) } returns Result.failure(Exception("Login failed"))
 
         // When
         val result = useCase("test@test.com", "password")
@@ -119,7 +118,7 @@ class LogInUseCaseTest {
         // Given
         val testUser = TestFixtures.createUser(email = "test@test.com")
         coEvery { passwordHasher.hash(any()) } returns "hashedPassword"
-        coEvery { authRepository.login(any()) } returns Result.success(testUser)
+        coEvery { authRepository.login(any(), any()) } returns Result.success(testUser)
 
         // When
         val result = useCase("test@test.com", "password")
@@ -134,7 +133,7 @@ class LogInUseCaseTest {
         // Given
         val exception = Exception("Network error")
         coEvery { passwordHasher.hash(any()) } returns "hashedPassword"
-        coEvery { authRepository.login(any()) } returns Result.failure(exception)
+        coEvery { authRepository.login(any(), any()) } returns Result.failure(exception)
 
         // When
         val result = useCase("test@test.com", "password")

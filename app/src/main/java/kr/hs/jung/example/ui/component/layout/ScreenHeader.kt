@@ -3,7 +3,6 @@ package kr.hs.jung.example.ui.component.layout
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -12,51 +11,22 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import kr.hs.jung.example.ui.theme.Brand
 import kr.hs.jung.example.ui.theme.Dimensions
 import kr.hs.jung.example.ui.theme.ExampleAndroidTheme
-import kr.hs.jung.example.ui.theme.TextPrimary
+import kr.hs.jung.example.ui.theme.ExampleTheme
 
-// 컴포저블 외부에 정의된 불변 스타일 상수 - 리컴포지션 시 재생성 방지
-private val BrandHeaderStyle = TextStyle(
-    fontSize = 28.sp,
-    lineHeight = 28.sp,
-    fontWeight = FontWeight.Bold,
-    color = Brand
-)
-
+// 색상을 제외한 불변 스타일 상수 - 테마 색상은 @Composable 내에서 적용
 private val TitleStyle = TextStyle(
-    fontSize = 28.sp,
-    lineHeight = 32.sp,
-    fontWeight = FontWeight.SemiBold,
-    color = TextPrimary
+    fontSize = 30.sp,
+    lineHeight = 36.sp,
+    fontWeight = FontWeight.Bold
 )
 
 private val SubtitleStyle = TextStyle(
-    fontSize = 15.sp,
-    lineHeight = 20.sp,
-    fontWeight = FontWeight.Normal,
-    color = TextPrimary
+    fontSize = 16.sp,
+    lineHeight = 24.sp,
+    fontWeight = FontWeight.Normal
 )
-
-/**
- * 화면 헤더 컴포넌트
- *
- * 앱 이름을 표시하는 브랜드 헤더입니다.
- *
- * @param text 표시할 텍스트 (앱 이름)
- */
-@Composable
-fun BrandHeader(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        modifier = modifier.padding(vertical = Dimensions.Screen.VerticalPadding),
-        text = text,
-        style = BrandHeaderStyle
-    )
-}
 
 /**
  * 타이틀/서브타이틀 섹션 컴포넌트
@@ -81,22 +51,14 @@ fun TitleSection(
     ) {
         Text(
             text = title,
-            style = TitleStyle
+            style = TitleStyle.copy(color = ExampleTheme.extendedColors.textPrimary)
         )
         if (subtitle != null) {
             Text(
                 text = subtitle,
-                style = SubtitleStyle
+                style = SubtitleStyle.copy(color = ExampleTheme.extendedColors.textSecondary)
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun BrandHeaderPreview() {
-    ExampleAndroidTheme {
-        BrandHeader(text = "Example App")
     }
 }
 

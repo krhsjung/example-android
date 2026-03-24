@@ -82,57 +82,6 @@ class MemoryCache<K : Any, V : Any>(
         }
     }
 
-    /**
-     * 현재 캐시 크기를 반환합니다.
-     */
-    suspend fun size(): Int = mutex.withLock {
-        cache.size
-    }
-
-    /**
-     * 캐시에서 값을 가져오거나, 없으면 loader를 실행하여 캐시에 저장합니다.
-     *
-     * @param key 캐시 키
-     * @param ttl 캐시 TTL (null이면 기본값 사용)
-     * @param loader 캐시 미스 시 실행할 로더
-     * @return 캐시된 값 또는 로더에서 반환된 값
-     */
-    suspend fun getOrPut(
-        key: K,
-        ttl: Duration? = null,
-        loader: suspend () -> V
-    ): V {
-        // 먼저 캐시에서 조회
-        get(key)?.let { return it }
-
-        // 캐시 미스: 로더 실행 후 캐시에 저장
-        val value = loader()
-        put(key, value, ttl)
-        return value
-    }
-
-    /**
-     * 캐시에서 값을 가져오거나, 없으면 loader를 실행합니다.
-     * loader 결과가 null이면 캐시에 저장하지 않습니다.
-     *
-     * @param key 캐시 키
-     * @param ttl 캐시 TTL (null이면 기본값 사용)
-     * @param loader 캐시 미스 시 실행할 로더
-     * @return 캐시된 값 또는 로더에서 반환된 값 (null 가능)
-     */
-    suspend fun getOrLoad(
-        key: K,
-        ttl: Duration? = null,
-        loader: suspend () -> V?
-    ): V? {
-        // 먼저 캐시에서 조회
-        get(key)?.let { return it }
-
-        // 캐시 미스: 로더 실행
-        val value = loader() ?: return null
-        put(key, value, ttl)
-        return value
-    }
 }
 
 /**
@@ -186,17 +135,4 @@ class SingleValueCache<V : Any>(
         !current.isExpired()
     }
 
-    /**
-     * 캐시된 값을 가져오거나, 없으면 loader를 실행합니다.
-     */
-    suspend fun getOrLoad(
-        ttl: Duration? = null,
-        loader: suspend () -> V?
-    ): V? {
-        get()?.let { return it }
-
-        val value = loader() ?: return null
-        set(value, ttl)
-        return value
-    }
 }

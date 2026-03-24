@@ -19,24 +19,6 @@ import javax.inject.Singleton
 annotation class IoDispatcher
 
 /**
- * Main 스레드용 Dispatcher Qualifier
- *
- * UI 업데이트에 사용합니다.
- */
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
-annotation class MainDispatcher
-
-/**
- * CPU 집약적 작업용 Dispatcher Qualifier
- *
- * 계산, 정렬 등 CPU를 많이 사용하는 작업에 사용합니다.
- */
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
-annotation class DefaultDispatcher
-
-/**
  * Coroutine Dispatcher DI 모듈
  *
  * 테스트 시 TestDispatcher로 교체할 수 있도록
@@ -50,14 +32,4 @@ object DispatcherModule {
     @Singleton
     @IoDispatcher
     fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
-
-    @Provides
-    @Singleton
-    @MainDispatcher
-    fun provideMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
-
-    @Provides
-    @Singleton
-    @DefaultDispatcher
-    fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 }

@@ -15,7 +15,10 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
@@ -27,7 +30,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kr.hs.jung.example.R
 import kr.hs.jung.example.data.remote.OAuthHelper
-import kr.hs.jung.example.domain.model.SnsProvider
+import kr.hs.jung.example.domain.model.LoginProvider
 import kr.hs.jung.example.domain.model.appError
 import kr.hs.jung.example.domain.usecase.auth.ExchangeOAuthCodeUseCase
 import kr.hs.jung.example.ui.feature.auth.login.LogInScreen
@@ -39,6 +42,7 @@ import kr.hs.jung.example.ui.theme.ExampleAndroidTheme
 import kr.hs.jung.example.util.logger.AppLogger
 import kr.hs.jung.example.util.deeplink.DeepLinkHandler
 import kr.hs.jung.example.util.deeplink.DeepLinkResult
+import kr.hs.jung.example.util.deeplink.OAuthErrorCode
 import javax.inject.Inject
 
 /**
@@ -61,6 +65,9 @@ class AuthActivity : ComponentActivity() {
     private val _errorEvent = MutableSharedFlow<String>(extraBufferCapacity = 1)
     private val errorEvent = _errorEvent.asSharedFlow()
 
+    /** setContent 이전에 발생한 에러 메시지 (딥링크 에러 등) */
+    private var pendingError: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -71,9 +78,19 @@ class AuthActivity : ComponentActivity() {
         }
 
         setContent {
-            ExampleAndroidTheme {
+            var isDarkTheme by remember { mutableStateOf(false) }
+
+            ExampleAndroidTheme(darkTheme = isDarkTheme) {
                 val navController = rememberNavController()
                 val snackbarHostState = remember { SnackbarHostState() }
+
+                // setContent 이전에 발생한 에러 표시
+                LaunchedEffect(Unit) {
+                    pendingError?.let { message ->
+                        pendingError = null
+                        snackbarHostState.showSnackbar(message)
+                    }
+                }
 
                 // Activity 레벨 에러 이벤트 수신
                 LaunchedEffect(Unit) {
@@ -126,6 +143,8 @@ class AuthActivity : ComponentActivity() {
                     ) {
                         composable<AuthRoute.LogIn> {
                             LogInScreen(
+                                isDarkTheme = isDarkTheme,
+                                onToggleTheme = { isDarkTheme = !isDarkTheme },
                                 onNavigateToSignUp = {
                                     navController.navigate(AuthRoute.SignUp)
                                 },
@@ -183,8 +202,11 @@ class AuthActivity : ComponentActivity() {
                 true
             }
             is DeepLinkResult.OAuthError -> {
-                AppLogger.e("AuthActivity", "OAuth callback failed: ${result.error}")
-                showError(getString(R.string.error_oauth_callback_failed))
+                AppLogger.e("AuthActivity", "OAuth callback failed: ${result.errorCode}, ${result.serverMessage}")
+                pendingError = when (result.errorCode) {
+                    OAuthErrorCode.MISSING_CODE -> getString(R.string.error_oauth_missing_code)
+                    OAuthErrorCode.AUTH_FAILED -> getString(R.string.error_oauth_callback_failed)
+                }
                 false
             }
             is DeepLinkResult.Unknown -> {
@@ -200,7 +222,7 @@ class AuthActivity : ComponentActivity() {
      *
      * Chrome Custom Tab을 통해 OAuth 로그인 페이지로 이동
      */
-    private fun launchOAuth(provider: SnsProvider) {
+    private fun launchOAuth(provider: LoginProvider) {
         OAuthHelper.launchOAuth(this, provider)
     }
 

@@ -29,20 +29,19 @@ data class User(
  *
  * 사용자가 가입/로그인한 방식을 나타냅니다.
  * kotlinx.serialization에서 value 값으로 직렬화됩니다.
+ *
+ * @property value 서버 API에서 사용하는 문자열 값
+ * @property isOAuth OAuth 기반 소셜 로그인 제공자 여부
  */
 @Serializable
-enum class LoginProvider(val value: String) {
+enum class LoginProvider(val value: String, val isOAuth: Boolean = false) {
     @SerialName("email") EMAIL("email"),
-    @SerialName("google") GOOGLE("google"),
-    @SerialName("apple") APPLE("apple")
-}
+    @SerialName("google") GOOGLE("google", isOAuth = true),
+    @SerialName("apple") APPLE("apple", isOAuth = true);
 
-/**
- * SNS OAuth 제공자 타입
- *
- * OAuth 인증에 사용 가능한 SNS 제공자입니다.
- */
-enum class SnsProvider(val value: String) {
-    GOOGLE("google"),
-    APPLE("apple")
+    companion object {
+        /** OAuth 소셜 로그인 제공자 목록 */
+        val oAuthProviders: List<LoginProvider>
+            get() = entries.filter { it.isOAuth }
+    }
 }

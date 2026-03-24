@@ -1,4 +1,4 @@
-package kr.hs.jung.example.ui.component.divider
+package kr.hs.jung.example.ui.component.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,9 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kr.hs.jung.example.ui.theme.Dimensions
-import kr.hs.jung.example.ui.theme.DividerLine
 import kr.hs.jung.example.ui.theme.ExampleAndroidTheme
-import kr.hs.jung.example.ui.theme.TextSecondary
+import kr.hs.jung.example.ui.theme.ExampleTheme
 
 /**
  * 텍스트가 포함된 구분선 컴포넌트 (재사용 가능)
@@ -36,8 +35,8 @@ import kr.hs.jung.example.ui.theme.TextSecondary
 fun ExampleDividerWithText(
     text: String,
     modifier: Modifier = Modifier,
-    textColor: Color = TextSecondary,
-    lineColor: Color = DividerLine,
+    textColor: Color = ExampleTheme.extendedColors.textSecondary,
+    lineColor: Color = ExampleTheme.extendedColors.dividerLine,
     lineHeight: Dp = 1.5.dp
 ) {
     // TextStyle 메모라이제이션으로 리컴포지션 최적화

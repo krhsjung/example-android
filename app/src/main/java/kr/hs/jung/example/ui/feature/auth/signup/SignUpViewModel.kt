@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import kr.hs.jung.example.di.IoDispatcher
 import kr.hs.jung.example.domain.model.AppError
 import kr.hs.jung.example.domain.model.SignUpFormData
-import kr.hs.jung.example.domain.model.SnsProvider
+import kr.hs.jung.example.domain.model.LoginProvider
 import kr.hs.jung.example.domain.model.ValidationResult
 import kr.hs.jung.example.domain.model.appError
 import kr.hs.jung.example.domain.usecase.auth.SignUpUseCase
@@ -25,7 +25,11 @@ data class SignUpUiState(
     val name: String = DebugConfig.testName,
     val isAgreeToTerms: Boolean = DebugConfig.testAgreeToTerms,
     val isLoading: Boolean = false,
-    val error: AppError? = null
+    val error: AppError? = null,
+    val emailError: AppError.Validation? = null,
+    val passwordError: AppError.Validation? = null,
+    val confirmPasswordError: AppError.Validation? = null,
+    val nameError: AppError.Validation? = null
 ) {
     val isFormValid: Boolean
         get() = email.isNotBlank() &&
@@ -40,7 +44,7 @@ data class SignUpUiState(
  */
 sealed class SignUpEvent {
     data object Success : SignUpEvent()
-    data class OAuthRequest(val provider: SnsProvider) : SignUpEvent()
+    data class OAuthRequest(val provider: LoginProvider) : SignUpEvent()
 }
 
 /**
@@ -48,7 +52,7 @@ sealed class SignUpEvent {
  *
  * 회원가입 화면의 상태 관리와 비즈니스 로직을 담당합니다.
  * - 이메일/비밀번호/이름 입력 상태 관리
- * - 폼 유효성 검증 (비밀번호 확인 포함)
+ * - 필드별 인라인 유효성 검증 (blur 시)
  * - 약관 동의 상태 관리
  * - 회원가입 API 호출
  * - OAuth 인증 요청 이벤트 발행
@@ -68,21 +72,53 @@ class SignUpViewModel @Inject constructor(
             isAgreeToTerms = currentState.isAgreeToTerms
         )
 
-    fun updateEmail(value: String) = updateState { copy(email = value) }
+    fun updateEmail(value: String) = updateState { copy(email = value, emailError = null) }
 
-    fun updatePassword(value: String) = updateState { copy(password = value) }
+    fun updatePassword(value: String) = updateState { copy(password = value, passwordError = null) }
 
-    fun updateConfirmPassword(value: String) = updateState { copy(confirmPassword = value) }
+    fun updateConfirmPassword(value: String) = updateState { copy(confirmPassword = value, confirmPasswordError = null) }
 
-    fun updateName(value: String) = updateState { copy(name = value) }
+    fun updateName(value: String) = updateState { copy(name = value, nameError = null) }
 
     fun updateAgreeToTerms(value: Boolean) = updateState { copy(isAgreeToTerms = value) }
 
-    fun signUp() {
-        val validationResult = formData.validateAll()
+    // blur 시 호출되는 필드별 검증 메서드
+    fun validateEmail() {
+        val result = formData.validateEmail()
+        updateState { copy(emailError = (result as? ValidationResult.Failure)?.error) }
+    }
 
-        if (validationResult is ValidationResult.Failure) {
-            updateState { copy(error = validationResult.error) }
+    fun validatePassword() {
+        val result = formData.validatePassword()
+        updateState { copy(passwordError = (result as? ValidationResult.Failure)?.error) }
+    }
+
+    fun validateConfirmPassword() {
+        val result = formData.validateConfirmPassword()
+        updateState { copy(confirmPasswordError = (result as? ValidationResult.Failure)?.error) }
+    }
+
+    fun validateName() {
+        val result = formData.validateName()
+        updateState { copy(nameError = (result as? ValidationResult.Failure)?.error) }
+    }
+
+    fun signUp() {
+        // 필드별 개별 검증 → 인라인 에러 표시
+        val emailErr = (formData.validateEmail() as? ValidationResult.Failure)?.error
+        val passwordErr = (formData.validatePassword() as? ValidationResult.Failure)?.error
+        val confirmPasswordErr = (formData.validateConfirmPassword() as? ValidationResult.Failure)?.error
+        val nameErr = (formData.validateName() as? ValidationResult.Failure)?.error
+
+        if (emailErr != null || passwordErr != null || confirmPasswordErr != null || nameErr != null) {
+            updateState {
+                copy(
+                    emailError = emailErr,
+                    passwordError = passwordErr,
+                    confirmPasswordError = confirmPasswordErr,
+                    nameError = nameErr
+                )
+            }
             return
         }
 
@@ -101,7 +137,7 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
-    fun signInWith(provider: SnsProvider) = sendEvent(SignUpEvent.OAuthRequest(provider))
+    fun signInWith(provider: LoginProvider) = sendEvent(SignUpEvent.OAuthRequest(provider))
 
     fun clearError() = updateState { copy(error = null) }
 }

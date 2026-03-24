@@ -1,7 +1,6 @@
 package kr.hs.jung.example.ui.common
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,8 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * ViewModel 기본 클래스
@@ -80,24 +77,5 @@ abstract class BaseViewModel<S, E>(
         } finally {
             updateState { setLoading(false) }
         }
-    }
-
-    /**
-     * IO Dispatcher에서 비동기 작업을 실행합니다.
-     *
-     * @param action 실행할 비동기 작업
-     */
-    protected suspend fun <T> withIoContext(action: suspend () -> T): T {
-        return withContext(ioDispatcher) { action() }
-    }
-
-    /**
-     * viewModelScope에서 코루틴을 실행합니다.
-     * 테스트 시 Dispatcher 교체가 용이합니다.
-     *
-     * @param action 실행할 비동기 작업
-     */
-    protected fun launchInScope(action: suspend () -> Unit) {
-        viewModelScope.launch { action() }
     }
 }

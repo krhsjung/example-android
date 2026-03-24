@@ -200,8 +200,8 @@ app/src/main/java/kr/hs/jung/example/
 
 ### 네트워크
 
-- [ ] 네트워크 상태 모니터링 (ConnectivityManager)
-- [ ] 중복 요청 방지 (Request coalescing)
+- [x] 네트워크 상태 모니터링 (ConnectivityManager)
+- [x] 중복 요청 방지 (Request coalescing)
 
 ### 테스트
 

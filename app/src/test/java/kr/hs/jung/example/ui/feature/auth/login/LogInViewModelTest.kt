@@ -7,8 +7,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import kr.hs.jung.example.domain.model.AppError
-import kr.hs.jung.example.domain.model.SnsProvider
+import kr.hs.jung.example.domain.model.LoginProvider
 import kr.hs.jung.example.domain.usecase.auth.LogInUseCase
 import kr.hs.jung.example.util.BaseViewModelTest
 import kr.hs.jung.example.util.TestFixtures
@@ -64,9 +63,11 @@ class LogInViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `clearError clears error from state`() = runTest {
-        // Given: 에러가 있는 상태
-        viewModel.updateEmail("")
-        viewModel.logIn() // 빈 이메일로 검증 에러 발생
+        // Given: 서버 에러가 있는 상태
+        coEvery { logInUseCase(any(), any()) } returns Result.failure(Exception("Login failed"))
+        viewModel.updateEmail("test@test.com")
+        viewModel.updatePassword("ValidPass123!")
+        viewModel.logIn()
 
         viewModel.uiState.assertPropertyIsNotNull { it.error }
 
@@ -91,9 +92,7 @@ class LogInViewModelTest : BaseViewModelTest() {
         viewModel.logIn()
 
         // Then
-        val error = viewModel.uiState.value.error
-        assertThat(error).isNotNull()
-        assertThat(error).isInstanceOf(AppError.Validation::class.java)
+        viewModel.uiState.assertPropertyIsNotNull { it.emailError }
     }
 
     @Test
@@ -106,9 +105,7 @@ class LogInViewModelTest : BaseViewModelTest() {
         viewModel.logIn()
 
         // Then
-        val error = viewModel.uiState.value.error
-        assertThat(error).isNotNull()
-        assertThat(error).isInstanceOf(AppError.Validation::class.java)
+        viewModel.uiState.assertPropertyIsNotNull { it.emailError }
     }
 
     @Test
@@ -121,7 +118,7 @@ class LogInViewModelTest : BaseViewModelTest() {
         viewModel.logIn()
 
         // Then
-        viewModel.uiState.assertPropertyIsNotNull { it.error }
+        viewModel.uiState.assertPropertyIsNotNull { it.passwordError }
     }
 
     @Test
@@ -247,9 +244,9 @@ class LogInViewModelTest : BaseViewModelTest() {
     fun `signInWith emits OAuthRequest event`() = runTest {
         // When & Then
         viewModel.event.collectEvent(
-            action = { viewModel.signInWith(SnsProvider.GOOGLE) },
+            action = { viewModel.signInWith(LoginProvider.GOOGLE) },
             assertion = { event ->
-                assertThat(event).isEqualTo(LogInEvent.OAuthRequest(SnsProvider.GOOGLE))
+                assertThat(event).isEqualTo(LogInEvent.OAuthRequest(LoginProvider.GOOGLE))
             }
         )
     }
@@ -258,12 +255,12 @@ class LogInViewModelTest : BaseViewModelTest() {
     fun `signInWith with different providers emits correct events`() = runTest {
         viewModel.event.test {
             // Google
-            viewModel.signInWith(SnsProvider.GOOGLE)
-            assertThat(awaitItem()).isEqualTo(LogInEvent.OAuthRequest(SnsProvider.GOOGLE))
+            viewModel.signInWith(LoginProvider.GOOGLE)
+            assertThat(awaitItem()).isEqualTo(LogInEvent.OAuthRequest(LoginProvider.GOOGLE))
 
             // Apple
-            viewModel.signInWith(SnsProvider.APPLE)
-            assertThat(awaitItem()).isEqualTo(LogInEvent.OAuthRequest(SnsProvider.APPLE))
+            viewModel.signInWith(LoginProvider.APPLE)
+            assertThat(awaitItem()).isEqualTo(LogInEvent.OAuthRequest(LoginProvider.APPLE))
         }
     }
 

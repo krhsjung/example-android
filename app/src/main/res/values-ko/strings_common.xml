@@ -13,6 +13,7 @@
     <string name="loading">로딩 중...</string>
     <string name="login">로그인</string>
     <string name="logout">로그아웃</string>
+    <string name="name">이름</string>
     <string name="next">다음</string>
     <string name="ok">확인</string>
     <string name="password">비밀번호</string>
@@ -20,4 +21,9 @@
     <string name="save">저장</string>
     <string name="signup">회원가입</string>
     <string name="submit">제출</string>
+    <string name="switch_to_dark_mode">다크 모드로 전환</string>
+    <string name="switch_to_light_mode">라이트 모드로 전환</string>
+    <string name="network_unavailable">네트워크 연결을 확인해주세요</string>
+    <string name="tab_first">첫 번째</string>
+    <string name="tab_second">두 번째</string>
 </resources>

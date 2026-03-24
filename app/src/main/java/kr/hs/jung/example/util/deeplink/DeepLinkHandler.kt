@@ -15,9 +15,13 @@ sealed class DeepLinkResult {
 
     /**
      * OAuth 실패
-     * @property error 에러 메시지
+     * @property errorCode 에러 코드 (UI 계층에서 문자열 리소스로 변환)
+     * @property serverMessage 서버에서 전달한 에러 메시지 (선택, 디버깅용)
      */
-    data class OAuthError(val error: String) : DeepLinkResult()
+    data class OAuthError(
+        val errorCode: OAuthErrorCode,
+        val serverMessage: String? = null
+    ) : DeepLinkResult()
 
     /**
      * 알 수 없는 Deep Link
@@ -29,6 +33,19 @@ sealed class DeepLinkResult {
      * Deep Link 아님
      */
     data object NotDeepLink : DeepLinkResult()
+}
+
+/**
+ * OAuth 에러 코드
+ *
+ * Context 없이 에러 유형을 전달하고,
+ * UI 계층에서 문자열 리소스로 변환합니다.
+ */
+enum class OAuthErrorCode {
+    /** 인증 코드가 없음 */
+    MISSING_CODE,
+    /** OAuth 인증 실패 (서버 응답) */
+    AUTH_FAILED
 }
 
 /**
@@ -76,13 +93,13 @@ object DeepLinkHandler {
         return if (success) {
             val code = uri.getQueryParameter("code")
             if (code.isNullOrBlank()) {
-                DeepLinkResult.OAuthError("인증 코드가 없습니다")
+                DeepLinkResult.OAuthError(OAuthErrorCode.MISSING_CODE)
             } else {
                 DeepLinkResult.OAuthCallback(code)
             }
         } else {
-            val error = uri.getQueryParameter("error") ?: "OAuth 인증에 실패했습니다"
-            DeepLinkResult.OAuthError(error)
+            val serverMessage = uri.getQueryParameter("error")
+            DeepLinkResult.OAuthError(OAuthErrorCode.AUTH_FAILED, serverMessage)
         }
     }
 }

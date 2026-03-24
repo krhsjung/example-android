@@ -2,16 +2,17 @@
 <resources>
 
     <!-- General errors -->
-    <string name="errorCancelled">Cancelled</string>
-    <string name="error_decoding">Decoding error</string>
-    <string name="error_encoding">Encoding error</string>
-    <string name="error_invalid_url">Invalid url</string>
+    <string name="error_cancelled">Cancelled</string>
+    <string name="error_decoding">Failed to parse data</string>
+    <string name="error_encoding">Failed to encode data</string>
+    <string name="error_invalid_url">Invalid URL</string>
     <string name="error_login_cancelled">Login was cancelled</string>
     <string name="error_login_failed">Login failed</string>
-    <string name="error_no_data">No data</string>
+    <string name="error_no_data">No data available</string>
     <string name="error_oauth_callback_failed">Failed to receive callback URL</string>
+    <string name="error_oauth_missing_code">Authentication code is missing</string>
     <string name="error_signup_failed">Signup failed</string>
-    <string name="error_unknown">Unknown error</string>
+    <string name="error_unknown">An unexpected error occurred</string>
 
     <!-- Network errors -->
     <string name="error_timeout">Connection timed out. Please try again.</string>
@@ -39,6 +40,5 @@
     <string name="error_password_no_uppercase">Password must contain an uppercase letter</string>
     <string name="error_password_no_lowercase">Password must contain a lowercase letter</string>
     <string name="error_password_no_number">Password must contain a number</string>
-    <string name="error_password_not_match">Passwords do not match</string>
     <string name="error_password_no_special_character">Password must contain a special character</string>
 </resources>

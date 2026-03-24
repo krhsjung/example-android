@@ -1,6 +1,8 @@
 package kr.hs.jung.example.ui.theme
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
@@ -29,17 +31,32 @@ data class InputBoxStyle(
     val backgroundColor: Color = InputBoxBackground,
     val textColor: Color = TextPrimary,
     val placeholderColor: Color = PlaceholderColor,
-    val cornerRadius: Dp = Dimensions.InputBox.CornerRadius,
-    val horizontalPadding: Dp = Dimensions.InputBox.HorizontalPadding,
-    val verticalPadding: Dp = Dimensions.InputBox.VerticalPadding,
-    val fontSize: TextUnit = Dimensions.InputBox.FontSize
+    val cornerRadius: Dp = Dimensions.Input.CornerRadius,
+    val horizontalPadding: Dp = Dimensions.Input.HorizontalPadding,
+    val verticalPadding: Dp = Dimensions.Input.VerticalPadding,
+    val fontSize: TextUnit = Dimensions.Input.FontSize
 ) {
     companion object {
         /**
-         * 기본 스타일 (싱글톤으로 리컴포지션 최적화)
+         * 기본 스타일 (싱글톤 - 라이트 모드 색상 고정)
          */
         @Stable
         val Default = InputBoxStyle()
+
+        /**
+         * 테마 인식 기본 스타일 (다크/라이트 모드 자동 대응)
+         */
+        val themed: InputBoxStyle
+            @Composable
+            @ReadOnlyComposable
+            get() {
+                val colors = ExampleTheme.extendedColors
+                return InputBoxStyle(
+                    backgroundColor = colors.inputBoxBackground,
+                    textColor = colors.textPrimary,
+                    placeholderColor = colors.placeholderColor
+                )
+            }
     }
 }
 
@@ -59,8 +76,8 @@ data class InputBoxStyle(
  */
 @Immutable
 data class ButtonStyle(
-    val backgroundColor: Color = PrimaryButton,
-    val textColor: Color = TextBlack,
+    val backgroundColor: Color = ButtonBackground,
+    val textColor: Color = ButtonText,
     val borderColor: Color? = null,
     val borderWidth: Dp = Dimensions.Button.BorderWidth,
     val cornerRadius: Dp = Dimensions.Button.CornerRadius,
@@ -74,43 +91,54 @@ data class ButtonStyle(
 ) {
     companion object {
         /**
-         * 기본 버튼 스타일
+         * 기본 버튼 스타일 (싱글톤 - 라이트 모드 색상 고정)
          */
         @Stable
         val Default = ButtonStyle()
 
         /**
-         * SNS 로그인 버튼 스타일
+         * 소셜 로그인 버튼 스타일 (싱글톤 - 라이트 모드 색상 고정)
          */
         @Stable
-        val Sns = ButtonStyle(
-            backgroundColor = SnsButtonBackground,
-            textColor = TextBlack,
+        val Social = ButtonStyle(
+            backgroundColor = SocialButtonBackground,
+            textColor = TextItem,
             borderColor = BorderPrimary,
-            horizontalPadding = Dimensions.SnsButton.HorizontalPadding,
-            minHeight = Dimensions.SnsButton.Height,
-            maxHeight = Dimensions.SnsButton.Height
+            horizontalPadding = Dimensions.SocialButton.HorizontalPadding,
+            minHeight = Dimensions.SocialButton.Height,
+            maxHeight = Dimensions.SocialButton.Height
         )
-    }
-}
 
-/**
- * Checkbox 스타일 설정
- */
-@Immutable
-data class CheckboxStyle(
-    val size: Dp = Dimensions.Checkbox.Size,
-    val cornerRadius: Dp = Dimensions.Checkbox.CornerRadius,
-    val borderWidth: Dp = Dimensions.Checkbox.BorderWidth,
-    val spacing: Dp = Dimensions.Checkbox.Spacing,
-    val fontSize: TextUnit = Dimensions.Checkbox.FontSize,
-    val checkedColor: Color = CheckboxChecked,
-    val uncheckedColor: Color = CheckboxUnchecked,
-    val borderColor: Color = BorderPrimary,
-    val textColor: Color = TextPrimary
-) {
-    companion object {
-        @Stable
-        val Default = CheckboxStyle()
+        /**
+         * 테마 인식 기본 버튼 스타일 (다크/라이트 모드 자동 대응)
+         */
+        val themed: ButtonStyle
+            @Composable
+            @ReadOnlyComposable
+            get() {
+                val colors = ExampleTheme.extendedColors
+                return ButtonStyle(
+                    backgroundColor = colors.buttonBackground,
+                    textColor = colors.buttonText
+                )
+            }
+
+        /**
+         * 테마 인식 소셜 로그인 버튼 스타일 (다크/라이트 모드 자동 대응)
+         */
+        val themedSocial: ButtonStyle
+            @Composable
+            @ReadOnlyComposable
+            get() {
+                val colors = ExampleTheme.extendedColors
+                return ButtonStyle(
+                    backgroundColor = colors.socialButtonBackground,
+                    textColor = colors.textItem,
+                    borderColor = colors.borderPrimary,
+                    horizontalPadding = Dimensions.SocialButton.HorizontalPadding,
+                    minHeight = Dimensions.SocialButton.Height,
+                    maxHeight = Dimensions.SocialButton.Height
+                )
+            }
     }
 }

@@ -20,6 +20,8 @@ import javax.inject.Singleton
  * JWT 토큰은 TokenManager를 통해 암호화 저장하고,
  * UserCache를 통해 사용자 정보를 캐싱하여 불필요한 네트워크 요청을 줄입니다.
  *
+ * DTO 생성은 이 구현체에서 수행하며, Domain 계층은 DTO에 의존하지 않습니다.
+ *
  * 캐시 전략:
  * - login/signUp/exchangeOAuthCode 성공 시 → 토큰 저장 + 캐시 갱신
  * - logout/clearSession 시 → 토큰 삭제 + 캐시 제거
@@ -34,7 +36,8 @@ class AuthRepositoryImpl @Inject constructor(
     private val userCache: UserCache
 ) : AuthRepository {
 
-    override suspend fun login(request: LoginRequestDto): Result<User> {
+    override suspend fun login(email: String, hashedPassword: String): Result<User> {
+        val request = LoginRequestDto(email = email, password = hashedPassword)
         return safeApiCall { authApi.login(request) }
             .map { authResponse ->
                 tokenManager.saveTokens(authResponse.accessToken, authResponse.refreshToken)
@@ -46,7 +49,8 @@ class AuthRepositoryImpl @Inject constructor(
             }
     }
 
-    override suspend fun signUp(request: SignUpRequestDto): Result<User> {
+    override suspend fun signUp(email: String, hashedPassword: String, name: String): Result<User> {
+        val request = SignUpRequestDto(email = email, password = hashedPassword, name = name)
         return safeApiCall { authApi.signUp(request) }
             .map { authResponse ->
                 tokenManager.saveTokens(authResponse.accessToken, authResponse.refreshToken)
@@ -76,7 +80,8 @@ class AuthRepositoryImpl @Inject constructor(
             }
     }
 
-    override suspend fun exchangeOAuthCode(request: ExchangeRequestDto): Result<User> {
+    override suspend fun exchangeOAuthCode(code: String): Result<User> {
+        val request = ExchangeRequestDto(code = code)
         return safeApiCall { authApi.exchange(request) }
             .map { authResponse ->
                 tokenManager.saveTokens(authResponse.accessToken, authResponse.refreshToken)

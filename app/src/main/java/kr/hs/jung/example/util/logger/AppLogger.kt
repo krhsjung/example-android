@@ -46,22 +46,19 @@ object AppLogger {
     }
 
     /**
-     * Error 로그 (항상 출력)
+     * Error 로그 (Debug 빌드에서만 출력)
+     *
+     * 릴리스 빌드에서는 민감한 정보(토큰, 에러 상세 등) 노출을 방지하기 위해
+     * 로그를 출력하지 않습니다. 추후 Crashlytics/Sentry 등 원격 로깅 통합 시
+     * 릴리스 빌드에서도 안전하게 에러를 수집할 수 있습니다.
      */
     fun e(tag: String, message: String, throwable: Throwable? = null) {
-        if (throwable != null) {
-            Log.e(formatTag(tag), message, throwable)
-        } else {
-            Log.e(formatTag(tag), message)
-        }
-    }
-
-    /**
-     * 네트워크 관련 로그 (Debug 빌드에서만 출력)
-     */
-    fun network(message: String) {
         if (BuildConfig.DEBUG) {
-            Log.d(formatTag("Network"), message)
+            if (throwable != null) {
+                Log.e(formatTag(tag), message, throwable)
+            } else {
+                Log.e(formatTag(tag), message)
+            }
         }
     }
 

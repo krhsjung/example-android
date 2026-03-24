@@ -3,8 +3,11 @@ package kr.hs.jung.example.ui.feature.main
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kr.hs.jung.example.di.IoDispatcher
+import kr.hs.jung.example.domain.state.NetworkStateHolder
 import kr.hs.jung.example.ui.common.state.AuthManager
 import kr.hs.jung.example.domain.usecase.auth.LogoutUseCase
 import kr.hs.jung.example.ui.common.BaseViewModel
@@ -14,7 +17,8 @@ import javax.inject.Inject
  * 메인 화면 UI 상태
  */
 data class MainUiState(
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val isNetworkAvailable: Boolean = true
 )
 
 /**
@@ -35,8 +39,15 @@ sealed class MainEvent {
 class MainViewModel @Inject constructor(
     private val logoutUseCase: LogoutUseCase,
     private val authManager: AuthManager,
+    networkStateHolder: NetworkStateHolder,
     @IoDispatcher ioDispatcher: CoroutineDispatcher
 ) : BaseViewModel<MainUiState, MainEvent>(MainUiState(), ioDispatcher) {
+
+    init {
+        networkStateHolder.isNetworkAvailable
+            .onEach { available -> updateState { copy(isNetworkAvailable = available) } }
+            .launchIn(viewModelScope)
+    }
 
     fun logout() {
         viewModelScope.launch {

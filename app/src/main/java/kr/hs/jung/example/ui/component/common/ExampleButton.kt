@@ -1,4 +1,4 @@
-package kr.hs.jung.example.ui.component.button
+package kr.hs.jung.example.ui.component.common
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
@@ -8,15 +8,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -51,7 +48,7 @@ fun ExampleButton(
     modifier: Modifier = Modifier,
     @DrawableRes icon: Int? = null,
     enabled: Boolean = true,
-    style: ButtonStyle = ButtonStyle.Default
+    style: ButtonStyle = ButtonStyle.themed
 ) {
     // Shape 메모라이제이션으로 리컴포지션 최적화
     val shape = remember(style.cornerRadius) {
@@ -103,37 +100,18 @@ fun ExampleButton(
     }
 }
 
-@Composable
-fun ExampleOutlinedButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true
-) {
-    OutlinedButton(
-        onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(Dimensions.Button.DefaultHeight),
-        enabled = enabled,
-        shape = MaterialTheme.shapes.medium
-    ) {
-        Text(text = text)
-    }
-}
-
 /**
- * SNS 로그인 버튼
+ * 소셜 로그인 버튼
  *
  * Google, Apple 등 소셜 로그인 버튼에 사용하는 통일된 스타일입니다.
- * ButtonStyle.Sns를 사용하여 리컴포지션을 최적화합니다.
+ * ButtonStyle.Social를 사용하여 리컴포지션을 최적화합니다.
  *
  * @param title 버튼 텍스트
  * @param icon 아이콘 리소스 ID
  * @param onClick 클릭 콜백
  */
 @Composable
-fun SnsLoginButton(
+fun SocialLoginButton(
     title: String,
     @DrawableRes icon: Int,
     onClick: () -> Unit,
@@ -144,7 +122,7 @@ fun SnsLoginButton(
         icon = icon,
         onClick = onClick,
         modifier = modifier,
-        style = ButtonStyle.Sns
+        style = ButtonStyle.themedSocial
     )
 }
 
@@ -162,15 +140,15 @@ fun ExampleButtonPreview() {
             // 기본 회원가입 버튼
             ExampleButton(title = "Sign Up", onClick = {})
 
-            // Google SNS 버튼
-            SnsLoginButton(
+            // Google 소셜 버튼
+            SocialLoginButton(
                 title = "Continue with Google",
                 icon = R.drawable.ic_google,
                 onClick = {}
             )
 
-            // Apple SNS 버튼
-            SnsLoginButton(
+            // Apple 소셜 버튼
+            SocialLoginButton(
                 title = "Continue with Apple",
                 icon = R.drawable.ic_apple,
                 onClick = {}

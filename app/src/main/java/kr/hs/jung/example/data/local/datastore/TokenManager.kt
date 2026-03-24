@@ -110,15 +110,6 @@ class TokenManager @Inject constructor(
         }
     }
 
-    /**
-     * 토큰 보유 여부 확인
-     *
-     * @return 액세스 토큰이 존재하면 true
-     */
-    fun hasTokens(): Boolean {
-        return getAccessToken() != null
-    }
-
     companion object {
         private const val TAG = "TokenManager"
         private const val PREFS_FILE_NAME = "encrypted_tokens"

@@ -4,7 +4,9 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kr.hs.jung.example.data.network.NetworkMonitor
 import kr.hs.jung.example.domain.state.AuthStateHolder
+import kr.hs.jung.example.domain.state.NetworkStateHolder
 import kr.hs.jung.example.ui.common.state.AuthState
 import javax.inject.Singleton
 
@@ -29,4 +31,10 @@ abstract class StateModule {
     abstract fun bindAuthStateHolder(
         authState: AuthState
     ): AuthStateHolder
+
+    @Binds
+    @Singleton
+    abstract fun bindNetworkStateHolder(
+        networkMonitor: NetworkMonitor
+    ): NetworkStateHolder
 }

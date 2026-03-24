@@ -1,4 +1,4 @@
-package kr.hs.jung.example.ui.component.dialog
+package kr.hs.jung.example.ui.component.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -65,7 +65,10 @@ fun ExampleLoadingOverlayBox(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
         content()
         if (isLoading) {
             ExampleLoadingOverlay()

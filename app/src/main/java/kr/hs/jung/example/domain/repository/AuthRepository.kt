@@ -1,8 +1,5 @@
 package kr.hs.jung.example.domain.repository
 
-import kr.hs.jung.example.data.remote.dto.ExchangeRequestDto
-import kr.hs.jung.example.data.remote.dto.LoginRequestDto
-import kr.hs.jung.example.data.remote.dto.SignUpRequestDto
 import kr.hs.jung.example.domain.model.User
 
 /**
@@ -10,13 +7,16 @@ import kr.hs.jung.example.domain.model.User
  *
  * 인증 관련 데이터 작업을 추상화합니다.
  * 구현체는 Data 레이어의 AuthRepositoryImpl입니다.
+ *
+ * Domain 계층은 Data 계층의 DTO에 의존하지 않으며,
+ * 원시 타입/도메인 모델만 사용합니다.
  */
 interface AuthRepository {
     /** 이메일/비밀번호 로그인 */
-    suspend fun login(request: LoginRequestDto): Result<User>
+    suspend fun login(email: String, hashedPassword: String): Result<User>
 
     /** 이메일 회원가입 */
-    suspend fun signUp(request: SignUpRequestDto): Result<User>
+    suspend fun signUp(email: String, hashedPassword: String, name: String): Result<User>
 
     /** 로그아웃 */
     suspend fun logout(): Result<Unit>
@@ -25,7 +25,7 @@ interface AuthRepository {
     suspend fun me(): Result<User>
 
     /** OAuth 인증 코드를 사용자 정보로 교환 */
-    suspend fun exchangeOAuthCode(request: ExchangeRequestDto): Result<User>
+    suspend fun exchangeOAuthCode(code: String): Result<User>
 
     /** 로컬 세션 정보 삭제 (쿠키, 캐시 등) */
     suspend fun clearSession()

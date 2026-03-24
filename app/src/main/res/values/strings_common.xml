@@ -13,6 +13,7 @@
     <string name="loading">Loading...</string>
     <string name="login">Log in</string>
     <string name="logout">Log out</string>
+    <string name="name">Name</string>
     <string name="next">Next</string>
     <string name="ok">OK</string>
     <string name="password">Password</string>
@@ -20,4 +21,9 @@
     <string name="save">Save</string>
     <string name="signup">Sign up</string>
     <string name="submit">Submit</string>
+    <string name="switch_to_dark_mode">Switch to dark mode</string>
+    <string name="switch_to_light_mode">Switch to light mode</string>
+    <string name="network_unavailable">Please check your network connection</string>
+    <string name="tab_first">First</string>
+    <string name="tab_second">Second</string>
 </resources>

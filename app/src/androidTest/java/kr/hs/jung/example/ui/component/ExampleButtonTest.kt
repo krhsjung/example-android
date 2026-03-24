@@ -7,8 +7,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
-import kr.hs.jung.example.ui.component.button.ExampleButton
-import kr.hs.jung.example.ui.component.button.ExampleOutlinedButton
+import kr.hs.jung.example.ui.component.common.ExampleButton
 import kr.hs.jung.example.ui.theme.ButtonStyle
 import kr.hs.jung.example.util.BaseComposeTest
 import org.junit.Test
@@ -145,46 +144,5 @@ class ExampleButtonTest : BaseComposeTest() {
         composeTestRule
             .onNodeWithText(title)
             .assertIsDisplayed()
-    }
-
-    @Test
-    fun outlined_button_displays_text_correctly() {
-        // Given
-        val text = "Outlined Button"
-
-        // When
-        setContentWithTheme {
-            ExampleOutlinedButton(
-                text = text,
-                onClick = {}
-            )
-        }
-
-        // Then
-        composeTestRule
-            .onNodeWithText(text)
-            .assertIsDisplayed()
-    }
-
-    @Test
-    fun outlined_button_triggers_onClick_when_clicked() {
-        // Given
-        var clicked = false
-        val text = "Click Outlined"
-
-        setContentWithTheme {
-            ExampleOutlinedButton(
-                text = text,
-                onClick = { clicked = true }
-            )
-        }
-
-        // When
-        composeTestRule
-            .onNodeWithText(text)
-            .performClick()
-
-        // Then
-        assertThat(clicked).isTrue()
     }
 }

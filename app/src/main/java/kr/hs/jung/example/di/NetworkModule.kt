@@ -10,13 +10,13 @@ import kotlinx.serialization.json.Json
 import kotlinx.coroutines.CoroutineDispatcher
 import kr.hs.jung.example.data.remote.NetworkConstants
 import kr.hs.jung.example.data.remote.AuthInterceptor
+import kr.hs.jung.example.data.remote.RequestCoalescingInterceptor
 import kr.hs.jung.example.data.remote.RetryInterceptor
 import kr.hs.jung.example.data.remote.SSLPinningConfig
 import kr.hs.jung.example.data.remote.SanitizingLoggingInterceptor
 import kr.hs.jung.example.data.remote.api.AuthApi
 import kr.hs.jung.example.util.config.AppConfig
 import okhttp3.ConnectionPool
-import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -72,6 +72,7 @@ object NetworkModule {
         loggingInterceptor: SanitizingLoggingInterceptor,
         retryInterceptor: RetryInterceptor,
         authInterceptor: AuthInterceptor,
+        coalescingInterceptor: RequestCoalescingInterceptor,
         connectionPool: ConnectionPool
     ): OkHttpClient = OkHttpClient.Builder()
         // 타임아웃 설정 (연결은 짧게, 읽기/쓰기는 길게)
@@ -80,14 +81,16 @@ object NetworkModule {
         .writeTimeout(NetworkConstants.WRITE_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         // 연결 풀 설정 (연결 재사용으로 성능 향상)
         .connectionPool(connectionPool)
+        // GET 요청 중복 방지 인터셉터 (동일 URL 동시 호출 시 하나만 수행)
+        .addInterceptor(coalescingInterceptor)
         // JWT 인증 인터셉터 (Bearer 토큰 주입 + 401 자동 갱신)
-        .addInterceptor(authInterceptor as Interceptor)
+        .addInterceptor(authInterceptor)
         // 재시도 인터셉터 (네트워크 인터셉터로 추가)
         .addInterceptor(retryInterceptor)
         // 로깅 인터셉터 (Debug 빌드에서만)
         .apply {
             if (AppConfig.isLoggingEnabled) {
-                addInterceptor(loggingInterceptor as Interceptor)
+                addInterceptor(loggingInterceptor)
             }
         }
         // SSL 인증서 피닝 (핀이 비어있으면 기본 SSL 검증)

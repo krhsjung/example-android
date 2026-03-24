@@ -1,8 +1,17 @@
 package kr.hs.jung.example.ui.feature.auth.signup
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -11,28 +20,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kr.hs.jung.example.R
-import kr.hs.jung.example.domain.model.SnsProvider
+import kr.hs.jung.example.domain.model.AppError
+import kr.hs.jung.example.domain.model.LoginProvider
 import kr.hs.jung.example.ui.common.ErrorMessageResolver
 import kr.hs.jung.example.ui.common.collectAsEvent
+import kr.hs.jung.example.ui.component.auth.AuthInputField
 import kr.hs.jung.example.ui.component.auth.SocialLoginButtons
-import kr.hs.jung.example.ui.component.layout.AuthScreenLayout
-import kr.hs.jung.example.ui.component.button.ExampleButton
-import kr.hs.jung.example.ui.component.checkbox.ExampleCheckbox
-import kr.hs.jung.example.ui.component.divider.ExampleDividerWithText
-import kr.hs.jung.example.ui.component.dialog.ExampleErrorAlert
-import kr.hs.jung.example.ui.component.input.ExampleInputBox
-import kr.hs.jung.example.ui.component.dialog.ExampleLoadingOverlayBox
+import kr.hs.jung.example.ui.component.common.ExampleButton
+import kr.hs.jung.example.ui.component.common.ExampleCheckbox
+import kr.hs.jung.example.ui.component.common.ExampleDividerWithText
+import kr.hs.jung.example.ui.component.common.ExampleErrorAlert
+import kr.hs.jung.example.ui.component.common.ExampleLoadingOverlayBox
 import kr.hs.jung.example.ui.component.layout.TitleSection
 import kr.hs.jung.example.ui.theme.Dimensions
+import kr.hs.jung.example.ui.theme.ExampleAndroidTheme
+import kr.hs.jung.example.ui.theme.ExampleTheme
 
 /**
  * 회원가입 화면 Composable
  *
- * 이메일/비밀번호로 회원가입 및 소셜 로그인을 제공하는 화면
+ * Figma SignupForm과 동일 구조:
+ * - TitleSection → CredentialsSection(Name→Email→PW→ConfirmPW) → Checkbox → Button
+ * - DividerWithText → SocialLoginButtons
+ * - Footer: "로그인" 링크
+ * - 필드별 인라인 에러 + blur 검증 + leading icon
  *
  * @param onNavigateBack 뒤로가기 콜백
  * @param onSignUpSuccess 회원가입 성공 시 콜백
@@ -43,7 +65,7 @@ import kr.hs.jung.example.ui.theme.Dimensions
 fun SignUpScreen(
     onNavigateBack: () -> Unit = {},
     onSignUpSuccess: () -> Unit = {},
-    onOAuthRequest: (SnsProvider) -> Unit = {},
+    onOAuthRequest: (LoginProvider) -> Unit = {},
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -64,44 +86,30 @@ fun SignUpScreen(
     val onNameChange = remember<(String) -> Unit>(viewModel) { { viewModel.updateName(it) } }
     val onAgreeToTermsChange = remember<(Boolean) -> Unit>(viewModel) { { viewModel.updateAgreeToTerms(it) } }
     val onSignUpClick = remember(viewModel) { { viewModel.signUp() } }
-    val onSnsLogin = remember<(SnsProvider) -> Unit>(viewModel) { { viewModel.signInWith(it) } }
+    val onSocialLogin = remember<(LoginProvider) -> Unit>(viewModel) { { viewModel.signInWith(it) } }
     val onClearError = remember(viewModel) { { viewModel.clearError() } }
+    val onValidateEmail = remember(viewModel) { { viewModel.validateEmail() } }
+    val onValidatePassword = remember(viewModel) { { viewModel.validatePassword() } }
+    val onValidateConfirmPassword = remember(viewModel) { { viewModel.validateConfirmPassword() } }
+    val onValidateName = remember(viewModel) { { viewModel.validateName() } }
 
-    ExampleLoadingOverlayBox(isLoading = uiState.isLoading) {
-        AuthScreenLayout(
-            header = {
-                TitleSection(
-                    title = stringResource(R.string.signup_title),
-                    subtitle = stringResource(R.string.signup_subtitle),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                )
-            }
-        ) {
-            SignUpForm(
-                email = uiState.email,
-                password = uiState.password,
-                confirmPassword = uiState.confirmPassword,
-                name = uiState.name,
-                isAgreeToTerms = uiState.isAgreeToTerms,
-                isFormValid = uiState.isFormValid,
-                onEmailChange = onEmailChange,
-                onPasswordChange = onPasswordChange,
-                onConfirmPasswordChange = onConfirmPasswordChange,
-                onNameChange = onNameChange,
-                onAgreeToTermsChange = onAgreeToTermsChange,
-                onSignUpClick = onSignUpClick
-            )
+    SignUpContent(
+        uiState = uiState,
+        onNameChange = onNameChange,
+        onEmailChange = onEmailChange,
+        onPasswordChange = onPasswordChange,
+        onConfirmPasswordChange = onConfirmPasswordChange,
+        onAgreeToTermsChange = onAgreeToTermsChange,
+        onValidateName = onValidateName,
+        onValidateEmail = onValidateEmail,
+        onValidatePassword = onValidatePassword,
+        onValidateConfirmPassword = onValidateConfirmPassword,
+        onSignUpClick = onSignUpClick,
+        onSocialLogin = onSocialLogin,
+        onNavigateBack = onNavigateBack
+    )
 
-            ExampleDividerWithText(
-                text = stringResource(R.string.signup_continue_with)
-            )
-
-            SocialLoginButtons(
-                onSnsLogin = onSnsLogin
-            )
-        }
-    }
-
+    // 서버/네트워크 에러만 다이얼로그로 표시 (유효성 에러는 인라인)
     ExampleErrorAlert(
         isPresented = uiState.error != null,
         message = uiState.error?.let { ErrorMessageResolver.getMessage(context, it) } ?: "",
@@ -110,36 +118,108 @@ fun SignUpScreen(
 }
 
 /**
- * 회원가입 폼
+ * 회원가입 화면 콘텐츠 (프리뷰 지원)
  *
- * 이메일/비밀번호/이름 입력 필드와 약관 동의, 회원가입 버튼
- *
- * @param email 이메일 입력값
- * @param password 비밀번호 입력값
- * @param confirmPassword 비밀번호 확인 입력값
- * @param name 이름 입력값
- * @param isAgreeToTerms 약관 동의 여부
- * @param isFormValid 폼 유효성 여부
- * @param onEmailChange 이메일 변경 콜백
- * @param onPasswordChange 비밀번호 변경 콜백
- * @param onConfirmPasswordChange 비밀번호 확인 변경 콜백
- * @param onNameChange 이름 변경 콜백
- * @param onAgreeToTermsChange 약관 동의 변경 콜백
- * @param onSignUpClick 회원가입 버튼 클릭 콜백
+ * ViewModel 의존성 없이 UiState만으로 렌더링
  */
 @Composable
-private fun SignUpForm(
+private fun SignUpContent(
+    uiState: SignUpUiState,
+    onNameChange: (String) -> Unit = {},
+    onEmailChange: (String) -> Unit = {},
+    onPasswordChange: (String) -> Unit = {},
+    onConfirmPasswordChange: (String) -> Unit = {},
+    onAgreeToTermsChange: (Boolean) -> Unit = {},
+    onValidateName: () -> Unit = {},
+    onValidateEmail: () -> Unit = {},
+    onValidatePassword: () -> Unit = {},
+    onValidateConfirmPassword: () -> Unit = {},
+    onSignUpClick: () -> Unit = {},
+    onSocialLogin: (LoginProvider) -> Unit = {},
+    onNavigateBack: () -> Unit = {}
+) {
+    ExampleLoadingOverlayBox(isLoading = uiState.isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Dimensions.Screen.HorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(Dimensions.SpacingXXLarge),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            TitleSection(
+                title = stringResource(R.string.application_name),
+                subtitle = stringResource(R.string.signup_subtitle),
+                horizontalAlignment = Alignment.CenterHorizontally
+            )
+
+            SignUpCredentialsSection(
+                name = uiState.name,
+                email = uiState.email,
+                password = uiState.password,
+                confirmPassword = uiState.confirmPassword,
+                isAgreeToTerms = uiState.isAgreeToTerms,
+                isFormValid = uiState.isFormValid,
+                nameError = uiState.nameError,
+                emailError = uiState.emailError,
+                passwordError = uiState.passwordError,
+                confirmPasswordError = uiState.confirmPasswordError,
+                onNameChange = onNameChange,
+                onEmailChange = onEmailChange,
+                onPasswordChange = onPasswordChange,
+                onConfirmPasswordChange = onConfirmPasswordChange,
+                onAgreeToTermsChange = onAgreeToTermsChange,
+                onValidateName = onValidateName,
+                onValidateEmail = onValidateEmail,
+                onValidatePassword = onValidatePassword,
+                onValidateConfirmPassword = onValidateConfirmPassword,
+                onSignUpClick = onSignUpClick
+            )
+
+            ExampleDividerWithText(
+                text = stringResource(R.string.signup_continue_with)
+            )
+
+            SocialLoginButtons(
+                onSocialLogin = onSocialLogin
+            )
+
+            LogInFooterSection(onNavigateBack = onNavigateBack)
+        }
+        }
+    }
+}
+
+/**
+ * 회원가입 인증 입력 섹션
+ *
+ * Figma 순서: 이름 → 이메일 → 비밀번호 → 비밀번호 확인
+ * 각 필드에 Figma에 맞는 leading icon 적용
+ */
+@Composable
+private fun SignUpCredentialsSection(
+    name: String,
     email: String,
     password: String,
     confirmPassword: String,
-    name: String,
     isAgreeToTerms: Boolean,
     isFormValid: Boolean,
+    nameError: AppError.Validation?,
+    emailError: AppError.Validation?,
+    passwordError: AppError.Validation?,
+    confirmPasswordError: AppError.Validation?,
+    onNameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
-    onNameChange: (String) -> Unit,
     onAgreeToTermsChange: (Boolean) -> Unit,
+    onValidateName: () -> Unit,
+    onValidateEmail: () -> Unit,
+    onValidatePassword: () -> Unit,
+    onValidateConfirmPassword: () -> Unit,
     onSignUpClick: () -> Unit
 ) {
     Column(
@@ -147,39 +227,158 @@ private fun SignUpForm(
         verticalArrangement = Arrangement.spacedBy(Dimensions.SpacingDefault),
         horizontalAlignment = Alignment.Start
     ) {
-        ExampleInputBox(
+        // 이름 (첫 번째) - person icon
+        AuthInputField(
+            label = stringResource(R.string.placeholder_name),
+            value = name,
+            onValueChange = onNameChange,
+            placeholder = stringResource(R.string.placeholder_name),
+            error = nameError,
+            leadingIcon = Icons.Outlined.Person,
+            onBlurValidate = onValidateName
+        )
+
+        // 이메일 (두 번째) - email icon
+        AuthInputField(
+            label = stringResource(R.string.email),
             value = email,
             onValueChange = onEmailChange,
             placeholder = stringResource(R.string.placeholder_email),
-            keyboardType = KeyboardType.Email
+            error = emailError,
+            keyboardType = KeyboardType.Email,
+            leadingIcon = Icons.Outlined.Email,
+            onBlurValidate = onValidateEmail
         )
-        ExampleInputBox(
+
+        // 비밀번호 (세 번째) - lock icon + eye toggle
+        AuthInputField(
+            label = stringResource(R.string.password),
             value = password,
             onValueChange = onPasswordChange,
             placeholder = stringResource(R.string.placeholder_password),
-            isSecure = true
+            error = passwordError,
+            isSecure = true,
+            leadingIcon = Icons.Outlined.Lock,
+            onBlurValidate = onValidatePassword
         )
-        ExampleInputBox(
+
+        // 비밀번호 확인 (네 번째) - lock icon + eye toggle
+        AuthInputField(
+            label = stringResource(R.string.placeholder_confirm_password),
             value = confirmPassword,
             onValueChange = onConfirmPasswordChange,
             placeholder = stringResource(R.string.placeholder_confirm_password),
-            isSecure = true
+            error = confirmPasswordError,
+            isSecure = true,
+            leadingIcon = Icons.Outlined.Lock,
+            onBlurValidate = onValidateConfirmPassword
         )
-        ExampleInputBox(
-            value = name,
-            onValueChange = onNameChange,
-            placeholder = stringResource(R.string.placeholder_name)
-        )
+
         ExampleCheckbox(
-            text = stringResource(R.string.signup_agree_to_terms),
             isChecked = isAgreeToTerms,
             onCheckedChange = onAgreeToTermsChange
+        ) {
+            val colors = ExampleTheme.extendedColors
+            val annotatedText = buildAnnotatedString {
+                withStyle(SpanStyle(color = colors.linkText, fontWeight = FontWeight.Medium)) {
+                    append(stringResource(R.string.signup_terms_of_service))
+                }
+                append(stringResource(R.string.signup_and))
+                withStyle(SpanStyle(color = colors.linkText, fontWeight = FontWeight.Medium)) {
+                    append(stringResource(R.string.signup_privacy_policy))
+                }
+                append(stringResource(R.string.signup_agree_suffix))
+            }
+            Text(
+                text = annotatedText,
+                style = TextStyle(fontSize = Dimensions.Checkbox.FontSize, color = colors.textSecondary)
+            )
+        }
+
+        ExampleButton(
+            title = stringResource(R.string.signup),
+            onClick = onSignUpClick,
+            enabled = isFormValid,
+            modifier = Modifier.alpha(if (isFormValid) 1.0f else 0.5f)
         )
     }
-    ExampleButton(
-        title = stringResource(R.string.signup),
-        onClick = onSignUpClick,
-        enabled = isFormValid,
-        modifier = Modifier.alpha(if (isFormValid) 1.0f else 0.5f)
+}
+
+/**
+ * 로그인 링크 푸터
+ *
+ * "로그인" 클릭 텍스트
+ */
+@Composable
+private fun LogInFooterSection(onNavigateBack: () -> Unit) {
+    Text(
+        text = stringResource(R.string.login),
+        style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium, color = ExampleTheme.extendedColors.linkText),
+        modifier = Modifier.clickable(onClick = onNavigateBack)
     )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun SignUpScreenPreview() {
+    ExampleAndroidTheme {
+        SignUpContent(
+            uiState = SignUpUiState(
+                name = "",
+                email = "",
+                password = "",
+                confirmPassword = ""
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun SignUpScreenFilledPreview() {
+    ExampleAndroidTheme {
+        SignUpContent(
+            uiState = SignUpUiState(
+                name = "홍길동",
+                email = "test@example.com",
+                password = "password123",
+                confirmPassword = "password123",
+                isAgreeToTerms = true
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun SignUpScreenWithErrorPreview() {
+    ExampleAndroidTheme {
+        SignUpContent(
+            uiState = SignUpUiState(
+                name = "",
+                email = "invalid",
+                password = "short",
+                confirmPassword = "mismatch",
+                nameError = AppError.Validation.EmptyUsername,
+                emailError = AppError.Validation.InvalidEmail,
+                passwordError = AppError.Validation.WeakPassword,
+                confirmPasswordError = AppError.Validation.PasswordMismatch
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun SignUpScreenDarkPreview() {
+    ExampleAndroidTheme(darkTheme = true) {
+        SignUpContent(
+            uiState = SignUpUiState(
+                name = "",
+                email = "",
+                password = "",
+                confirmPassword = ""
+            )
+        )
+    }
 }
