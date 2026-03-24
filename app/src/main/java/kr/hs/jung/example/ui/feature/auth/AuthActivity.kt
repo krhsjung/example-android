@@ -40,6 +40,7 @@ import kr.hs.jung.example.ui.feature.main.MainActivity
 import kr.hs.jung.example.ui.navigation.AuthRoute
 import kr.hs.jung.example.ui.theme.ExampleAndroidTheme
 import kr.hs.jung.example.util.logger.AppLogger
+import kr.hs.jung.example.util.deeplink.DeepLinkConfig
 import kr.hs.jung.example.util.deeplink.DeepLinkHandler
 import kr.hs.jung.example.util.deeplink.DeepLinkResult
 import kr.hs.jung.example.util.deeplink.OAuthErrorCode
@@ -67,6 +68,9 @@ class AuthActivity : ComponentActivity() {
 
     /** setContent 이전에 발생한 에러 메시지 (딥링크 에러 등) */
     private var pendingError: String? = null
+
+    /** 딥링크로 인한 초기 네비게이션 경로 */
+    private var pendingNavigation: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,9 +112,15 @@ class AuthActivity : ComponentActivity() {
                 ) { paddingValues ->
                     // Predictive Back 지원을 위한 트랜지션 애니메이션
                     val animationDuration = 300
+                    val startDestination: AuthRoute = if (pendingNavigation == DeepLinkConfig.Path.SIGNUP) {
+                        AuthRoute.SignUp
+                    } else {
+                        AuthRoute.LogIn
+                    }
+
                     NavHost(
                         navController = navController,
-                        startDestination = AuthRoute.LogIn,
+                        startDestination = startDestination,
                         modifier = Modifier.padding(paddingValues),
                         enterTransition = {
                             fadeIn(animationSpec = tween(animationDuration)) +
@@ -208,6 +218,11 @@ class AuthActivity : ComponentActivity() {
                     OAuthErrorCode.AUTH_FAILED -> getString(R.string.error_oauth_callback_failed)
                 }
                 false
+            }
+            is DeepLinkResult.Navigation -> {
+                AppLogger.d("AuthActivity", "Navigation deep link: ${result.path}")
+                pendingNavigation = result.path
+                false // setContent 진행
             }
             is DeepLinkResult.Unknown -> {
                 AppLogger.w("AuthActivity", "Unknown deep link: ${result.uri}")

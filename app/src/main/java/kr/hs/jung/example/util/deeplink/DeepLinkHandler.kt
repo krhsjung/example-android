@@ -24,6 +24,12 @@ sealed class DeepLinkResult {
     ) : DeepLinkResult()
 
     /**
+     * 앱 내 화면 네비게이션
+     * @property path 이동할 경로
+     */
+    data class Navigation(val path: String) : DeepLinkResult()
+
+    /**
      * 알 수 없는 Deep Link
      * @property uri 원본 URI
      */
@@ -76,6 +82,7 @@ object DeepLinkHandler {
     fun handle(uri: Uri): DeepLinkResult {
         return when {
             DeepLinkConfig.isOAuthCallback(uri) -> handleOAuthCallback(uri)
+            DeepLinkConfig.isSignUp(uri) -> DeepLinkResult.Navigation(DeepLinkConfig.Path.SIGNUP)
             uri.scheme == DeepLinkConfig.SCHEME -> DeepLinkResult.Unknown(uri)
             else -> DeepLinkResult.NotDeepLink
         }

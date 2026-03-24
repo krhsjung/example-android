@@ -17,6 +17,9 @@ object DeepLinkConfig {
         /** OAuth 콜백 */
         const val OAUTH_HOST = "oauth"
         const val OAUTH_CALLBACK = "/callback"
+
+        /** 회원가입 */
+        const val SIGNUP = "signup"
     }
 
     /** Deep Link URI 빌더 */
@@ -46,5 +49,17 @@ object DeepLinkConfig {
      */
     fun isOAuthCallback(uri: Uri): Boolean {
         return matches(uri, Path.OAUTH_HOST, Path.OAUTH_CALLBACK)
+    }
+
+    /**
+     * 회원가입 딥링크인지 확인
+     */
+    fun isSignUp(uri: Uri): Boolean {
+        // Custom Scheme: example://signup
+        if (matches(uri, Path.SIGNUP)) return true
+        // Universal Link: https://domain.com/link/signup
+        if ((uri.scheme == "https" || uri.scheme == "http") &&
+            uri.path?.trimEnd('/') == "/link/${Path.SIGNUP}") return true
+        return false
     }
 }

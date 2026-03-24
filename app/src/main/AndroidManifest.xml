@@ -44,6 +44,27 @@
                     android:host="oauth"
                     android:path="/callback" />
             </intent-filter>
+
+            <!-- 앱 내 화면 딥링크 (Custom Scheme) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="example"
+                    android:host="signup" />
+            </intent-filter>
+
+            <!-- App Links (HTTPS Universal Link) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="${DEEP_LINK_DOMAIN}"
+                    android:pathPrefix="/link/" />
+            </intent-filter>
         </activity>
 
         <!-- Main Activity -->
